@@ -1,0 +1,116 @@
+name: Deploy to GitHub Pages
+
+# main        → https://damienlethiec.github.io/takeoff-reign-version/
+# any branch  → https://damienlethiec.github.io/takeoff-reign-version/preview/<branch>/
+# Deleting a branch removes its preview.
+# Requires Settings → Pages → Source: "Deploy from a branch", branch gh-pages, folder / (root).
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+  delete:
+  workflow_dispatch:
+
+# Least privilege by default; each job asks for what it needs.
+permissions:
+  contents: read
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name != 'delete'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # push the build to gh-pages
+    steps:
+      # Third-party and official actions are pinned to full commit SHAs (tag in the comment).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false # actions-gh-pages pushes with its own github_token
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Work out where this branch is published
+        id: target
+        run: |
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            echo "dir=." >> "$GITHUB_OUTPUT"
+            echo "base=/takeoff-reign-version/" >> "$GITHUB_OUTPUT"
+            echo "url=https://damienlethiec.github.io/takeoff-reign-version/" >> "$GITHUB_OUTPUT"
+          else
+            slug=$(echo "$GITHUB_REF_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g')
+            echo "dir=preview/$slug" >> "$GITHUB_OUTPUT"
+            echo "base=/takeoff-reign-version/preview/$slug/" >> "$GITHUB_OUTPUT"
+            echo "url=https://damienlethiec.github.io/takeoff-reign-version/preview/$slug/" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+        env:
+          BASE_PATH: ${{ steps.target.outputs.base }}
+      - uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: dist
+          destination_dir: ${{ steps.target.outputs.dir }}
+          keep_files: true
+          commit_message: "Deploy ${{ github.ref_name }}"
+      - name: Show the link
+        env:
+          URL: ${{ steps.target.outputs.url }}
+        run: echo "### Play this version → $URL" >> "$GITHUB_STEP_SUMMARY"
+
+  # End-to-end test: plays whole games in Chromium (see e2e/ and playwright.config.ts).
+  # Runs next to the deploy job, so a failure flags the run without holding back the preview.
+  e2e:
+    if: github.event_name != 'delete'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+  remove-preview:
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # remove the preview folder from gh-pages
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: gh-pages
+      - name: Remove the deleted branch's preview
+        env:
+          BRANCH: ${{ github.event.ref }}
+        run: |
+          slug=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g')
+          if [ -d "preview/$slug" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git rm -rq "preview/$slug"
+            git commit -m "Remove preview of $BRANCH"
+            git push
+          fi
