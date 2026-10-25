@@ -21,9 +21,9 @@ Each gauge is a force that weighs on Europe's AI policy. All four start at 50. T
 | Gauge | What it measures | At 0 | At 100 |
 | --- | --- | --- | --- |
 | **Labs** | The weight of AI companies in Europe | **Exodus.** Labs and talent leave. Europe has no AI and no seat at the table. | **Capture.** Lobbyists write the rules. You are replaced by a friendlier envoy. |
-| **Citizens** | How mobilised the public is on AI | **Apathy.** Nobody cares. The Council ignores you and your mandate is not renewed. | **Panic.** A blanket ban passes in a week. The race goes on without Europe. |
+| **Citizens** | How mobilised the public is on AI | **Apathy.** Nobody cares. The Council ignores you and your mandate is not renewed. | **Patchwork.** Member states act alone, each suspending or banning AI services its own way. The market splits and you are sidelined. |
 | **Allies** | How close Europe is to Washington and Beijing | **Isolated.** Sanctions and cut-off chips. Europe cannot train or run anything. | **Absorbed.** Europe signs whatever it is asked. Its voice disappears. |
-| **Oversight** | Europe's capacity to see what AI systems do | **Blindsided.** A major incident nobody saw coming. You take the blame. | **Overreach.** Inspectors read everything. The Court strikes it down, and you go with it. |
+| **Oversight** | Europe's capacity to see what AI systems do | **Blindsided.** A major incident nobody saw coming. You take the blame. | **Overreach.** Your rules make providers keep every AI conversation. The EU Court annuls them, and the Commission drops you. |
 
 **Before answering**, the player sees which gauges will move and roughly how much (a small or a large mark), but not in which direction, as in *Reigns*. The direction is shown after the answer, with + / − and words.
 
@@ -135,6 +135,16 @@ The good ending needs both the deciding value and the safety net. These threshol
 - With `prefers-reduced-motion`, the card fades instead of flying and nothing pulses.
 - Ending screens and the archive move focus to their heading; overlays trap focus and close with Escape.
 - An axe audit and a whole run played with the keyboard alone run in CI.
+
+## Realism
+
+A swipe game invites caricature; this one must not. Every card stays close to **AI 2027** (the story) and **CFG, Advanced AI: Possible Futures** (the worlds and their drivers), as in Middle Power.
+
+- **Every card has a `basis`**: `ai2027`, `cfg` or `real`, with a precise reference. Characters voice positions that the scenarios or real actors hold. A test fails on any card without a basis.
+- **Milestones come in AI 2027's order; their dates may vary** with the hidden takeoff speed. A card tied to a milestone appears only after it.
+- **Answers have the effects the scenarios imply**: the direction follows their cause and effect; the size is tuned by the simulation.
+- **The eight early endings are plausible political outcomes**: the envoy loses the mandate for a concrete reason, tied to a real mechanism with a sourced precedent. No overnight bans, no apocalypse before the tipping point.
+- **Realism notes** in the build notes list every card or ending that interprets or stretches the scenarios, for Louis and the fact-check.
 
 ## Tech, content and validation
 
