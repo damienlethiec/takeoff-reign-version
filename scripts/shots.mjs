@@ -27,7 +27,7 @@ async function shoot(viewport, tag) {
     await page.waitForTimeout(350);
     await page.screenshot({ path: path.join(OUT, `${tag}-${name}.png`) });
   };
-  await page.goto(`${server.url}?seed=21&fresh`);
+  await page.goto(`${server.url}?seed=8&fresh`);
   await snap('01-title');
   await page.getByRole('button', { name: /Start your term/ }).click();
   await snap('02-tutorial');
@@ -73,18 +73,23 @@ async function shoot(viewport, tag) {
   await page.getByRole('button', { name: 'Menu' }).click();
   await snap('06-menu');
   await page.keyboard.press('Escape');
-  // play on; capture a delta right after an answer, a review, the tipping point and the ending
+  // play on; capture a delta right after an answer, a review, the tipping point and the ending.
+  // If a term ends without the tipping point, play another (up to four) to capture the finale.
   const seen = new Set();
-  for (let i = 0; i < 160; i++) {
-    if ((await page.locator('#app').getAttribute('data-screen')) === 'ending') break;
-    const kind = await page.evaluate(() => [...(document.querySelector('#card')?.classList ?? [])].find((c) => c.startsWith('kind-')));
-    for (const k of ['kind-news', 'kind-review', 'kind-ai', 'kind-lea', 'kind-tipping', 'kind-final', 'kind-followup'])
-      if (kind === k && !seen.has(k)) {
-        seen.add(k);
-        await snap(`07-${k.slice(5)}`);
-      }
-    await step();
-    if (i === 2) await snap('08-after-answer');
+  for (let term = 0; term < 4; term++) {
+    for (let i = 0; i < 160; i++) {
+      if ((await page.locator('#app').getAttribute('data-screen')) === 'ending') break;
+      const kind = await page.evaluate(() => [...(document.querySelector('#card')?.classList ?? [])].find((c) => c.startsWith('kind-')));
+      for (const k of ['kind-news', 'kind-review', 'kind-ai', 'kind-lea', 'kind-tipping', 'kind-final', 'kind-followup'])
+        if (kind === k && !seen.has(k)) {
+          seen.add(k);
+          await snap(`07-${k.slice(5)}`);
+        }
+      await step();
+      if (term === 0 && i === 2) await snap('08-after-answer');
+    }
+    if (seen.has('kind-tipping') || term === 3) break;
+    await page.getByRole('button', { name: /Play again/ }).click();
   }
   await snap('09-ending');
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));

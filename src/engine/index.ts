@@ -254,18 +254,23 @@ function impact(s: GameState, d: Effects): number {
     const v = d[fatal.gauge] ?? 0;
     return (fatal.high ? v : -v) + 0.01 * GAUGES.reduce((a, g) => a + Math.abs(d[g] ?? 0), 0);
   }
-  return 2 * Math.abs(d.safety ?? 0) + 2 * Math.abs(d.coop ?? 0) + 1.5 * Math.abs(d.europe ?? 0) + 0.5 * GAUGES.reduce((a, g) => a + Math.abs(d[g] ?? 0), 0);
+  // on a plateau Cooperation decides nothing and Europe's AI picks the world; after the tipping point it is the reverse
+  const plateau = s.tippedAt === undefined;
+  return 2 * Math.abs(d.safety ?? 0) + (plateau ? 0 : 2) * Math.abs(d.coop ?? 0) + (plateau ? 2 : 0.5) * Math.abs(d.europe ?? 0) + 0.5 * GAUGES.reduce((a, g) => a + Math.abs(d[g] ?? 0), 0);
 }
 
 export function result(s: GameState): EndingResult {
   if (!s.ending) throw new Error('The run is not over');
   const early = !['licensed_utopia', 'unstable_pause', 'cognitive_revolution', 'loss_of_control', 'multipolar_world', 'hot_war', 'bright_winter', 'decentralised_mayhem', 'agent_economy', 'silicon_blackmail'].includes(s.ending);
   const fin = early ? undefined : finalEnding(s);
+  // the answers that moved things most; at most one of the finale's, so earlier choices show too
+  let finals = 0;
   const decisive: Decisive[] = s.history
     .filter((h) => h.record)
     .map((h) => ({ h, score: impact(s, h.delta) }))
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score)
+    .filter((x) => CARD_BY_ID[x.h.cardId].kind !== 'final' || finals++ < 1)
     .slice(0, TUNING.decisiveCount)
     .sort((a, b) => a.h.turn - b.h.turn || s.history.indexOf(a.h) - s.history.indexOf(b.h))
     .map(({ h }) => ({ month: h.month, text: h.record! }));

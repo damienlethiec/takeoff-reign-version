@@ -243,6 +243,7 @@ export class App {
     card?.classList.remove('lean-l', 'lean-r');
     if (side && v.right) card?.classList.add(side === 'left' ? 'lean-l' : 'lean-r');
     card?.style.removeProperty('--dx');
+    card?.style.removeProperty('--rot');
     this.showMarks(side && v.right ? this.answerFor(side).marks : null);
     if (announce && side && v.right) {
       const a = this.answerFor(side);
@@ -267,6 +268,8 @@ export class App {
     const card = $<HTMLElement>('#card', this.root);
     const twoSided = !!view(prev).right;
     const out = reducedMotion() ? 'out-fade' : twoSided ? (side === 'left' ? 'out-left' : 'out-right') : 'out-up';
+    const slot = $<HTMLElement>('#card-slot', this.root);
+    if (slot && card) slot.style.minHeight = `${card.offsetHeight}px`;
     card?.classList.add(out);
     window.setTimeout(
       () => {
@@ -278,6 +281,7 @@ export class App {
           saveMeta(this.meta);
         }
         this.renderCard();
+        $<HTMLElement>('#card-slot', this.root)?.style.removeProperty('min-height');
         this.updateHud(prev);
         const moved = changesText(prev, next);
         const when = next.month !== prev.month ? ` ${dateLabel(next.month)}.` : '';
@@ -311,6 +315,7 @@ export class App {
     const card = $<HTMLElement>('#card', this.root)!;
     card.classList.add('dragging');
     card.style.setProperty('--dx', `${dx}px`);
+    card.style.setProperty('--rot', `${(dx / 22).toFixed(2)}deg`);
     const side: Side | null = Math.abs(dx) < 24 ? null : dx < 0 ? 'left' : 'right';
     const v = view(this.state!);
     card.classList.toggle('lean-l', side === 'left' && !!v.right);
@@ -325,6 +330,7 @@ export class App {
     const threshold = Math.min(110, card.offsetWidth * 0.3 || 110);
     if (Math.abs(dx) >= threshold) {
       card.style.setProperty('--dx', `${dx}px`);
+      card.style.setProperty('--rot', `${(dx / 22).toFixed(2)}deg`);
       this.confirm(view(this.state!).right ? (dx < 0 ? 'left' : 'right') : 'left');
     } else this.select(this.selected, false);
   }
@@ -333,6 +339,7 @@ export class App {
     const card = $<HTMLElement>('#card', this.root);
     card?.classList.remove('dragging');
     card?.style.removeProperty('--dx');
+    card?.style.removeProperty('--rot');
   }
 
   // ---- keyboard
@@ -389,7 +396,7 @@ export class App {
     const kicker = r.early
       ? `Your term ended early, in ${when}: ${GAUGE_NAME[e.gauge!]} ${e.high ? 'reached 100' : 'fell to 0'}.`
       : r.tipped
-        ? `The tipping point came in ${dateLabel(((s.tippedAt ?? 1) - 1) * TUNING.time.monthsPerCard)}. The world you leave: ${WORLD_NAMES[r.world!]}.`
+        ? `The tipping point came in ${dateLabel((s.tippedAt ?? 0) * TUNING.time.monthsPerCard)}. The world you leave: ${WORLD_NAMES[r.world!]}.`
         : `You served until December 2030. AI never tipped. The world you leave: ${WORLD_NAMES[r.world!]}.`;
     const band = (v: number, lo: string, mid: string, hi: string) => (v >= 60 ? hi : v >= 35 ? mid : lo);
     const tracks = [

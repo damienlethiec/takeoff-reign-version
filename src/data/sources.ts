@@ -49,13 +49,11 @@ export const SOURCES = {
   metr: { label: 'METR, Measuring AI Ability to Complete Long Tasks (Mar 2025)', url: 'https://arxiv.org/html/2503.14499v1' },
   aisr: { label: 'International AI Safety Report (Jan 2025)', url: 'https://arxiv.org/abs/2501.17805v1' },
   aisiAlignment: { label: 'UK AI Security Institute, The Alignment Project (Jul 2025)', url: 'https://www.aisi.gov.uk/work/announcing-the-alignment-project' },
-  gradual: { label: 'Gradual Disempowerment (Kulveit et al., 2025)', url: 'https://arxiv.org/abs/2501.16946' },
   fliPause: { label: 'Future of Life Institute, Pause Giant AI Experiments (Mar 2023)', url: 'https://futureoflife.org/open-letter/pause-giant-ai-experiments/' },
   caisStatement: { label: 'Center for AI Safety, Statement on AI Risk (May 2023)', url: 'https://safe.ai/work/statement-on-ai-risk' },
   rightToWarn: { label: 'Axios, OpenAI insiders call to protect AI whistleblowers (Jun 2024)', url: 'https://www.axios.com/2024/06/04/openai-whistleblowers-open-letter' },
   imf: { label: 'IMF Blog, AI will transform the global economy (Jan 2024)', url: 'https://www.imf.org/en/blogs/articles/2024/01/14/ai-will-transform-the-global-economy-lets-make-sure-it-benefits-humanity/index.md' },
   wga: { label: 'Writers Guild of America, Summary of the 2023 MBA', url: 'https://wgacontract2023.org/the-campaign/summary-of-the-2023-wga-mba' },
-  epoch: { label: 'Epoch AI, AI supercomputer performance share by country (2025)', url: 'https://epoch.ai/data-insights/ai-supercomputers-performance-share-by-country' },
   europe2031: { label: 'Europe 2031 (summary)', url: 'https://europe2031.ai/summary' },
   asmlCnbc: { label: 'CNBC, Inside ASML (2022)', url: 'https://www.cnbc.com/2022/03/23/inside-asml-the-company-advanced-chipmakers-use-for-euv-lithography.html' },
 } satisfies Record<string, Source>;

@@ -428,7 +428,16 @@ kbd {
   flex: 1;
 }
 .card-slot {
-  perspective: 900px;
+  position: relative;
+}
+/* the deck: the next card waiting underneath */
+.card-slot::before {
+  content: '';
+  position: absolute;
+  inset: 10px 12px -10px;
+  background: var(--field-deep);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
 }
 .card {
   --dx: 0px;
@@ -445,7 +454,9 @@ kbd {
   touch-action: pan-y;
   user-select: none;
   cursor: grab;
-  transform: translateX(var(--dx)) rotate(calc(var(--dx) / 22));
+  --rot: 0deg;
+  z-index: 1;
+  transform: translateX(var(--dx)) rotate(var(--rot));
   transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.2s;
 }
 .card.dragging {
@@ -459,9 +470,11 @@ kbd {
 }
 .card.lean-l:not(.dragging) {
   --dx: -14px;
+  --rot: -1.5deg;
 }
 .card.lean-r:not(.dragging) {
   --dx: 14px;
+  --rot: 1.5deg;
 }
 .card.out-left {
   transform: translateX(-130%) rotate(-18deg);
