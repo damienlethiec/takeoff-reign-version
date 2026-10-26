@@ -2,79 +2,87 @@
 
 The exact rules and numbers of *Takeoff: Reign Version*, and every tuning change with its reason. Intent lives in `docs/SPEC.md`; what the content rests on lives in `docs/SCENARIO_BASIS.md`. Every number below comes from `src/data/tuning.ts`.
 
+Since 26 October 2026 the game uses the world model of *Middle Power* v3 (same gauges, start values, zones and ending thresholds). The first version (four career gauges Labs / Citizens / Allies / Oversight, eight early endings at 0 or 100, hidden Cooperation / Safety / Steadiness) is in git history before commit `3ed01b4`; its tuning table is kept at the end of this file.
+
 ## State
 
 | Value | Range | Start | Visible? |
 | --- | --- | --- | --- |
-| Labs, Citizens, Allies, Oversight | 0–100 | 50 | Yes, as a fill and a number |
-| Cooperation (US–China) | 0–100 | 45 | No (Year in review in words; revealed at the end) |
-| Safety (true alignment of the leading AI) | 0–100 | 60 | No (hinted by characters; revealed at the end) |
-| Europe's AI | 0–100, Open at 50+ | 42 (Dependent) | No (Year in review in words; revealed at the end) |
-| Steadiness | 100 − 2 × mean distance of the four gauges from 50 | 100 | No (revealed at the end) |
-| AI progress | 0–100 | 0 | Yes, as a bar |
-| Takeoff speed | multiplier drawn once | slow 30% (0.55–0.85), steady 40% (0.95–1.35), fast 30% (1.5–2.3) | No (revealed at the end, in words) |
+| AI power | 0–100, tipping point at 80 | 18 | Yes, a bar with a tick at 80 |
+| Cooperation | 0–100; zones Pause 60+, Race 30–59, Rupture < 30 | 52 | Yes, a bar over the three zones |
+| Confidence (estimate) | 0–100 | 55 | Yes, as "55 ±15" with a band |
+| Margin | 3–30 | 15 | Yes (the ±) |
+| True Confidence | 0–100, always within estimate ± margin | 52 | No (hinted in words; revealed at the end) |
+| Cohesion | 0–100 | 66 | Yes |
+| Europe's AI | 0–100 lean, Open at 50+ | 42 (Dependent) | The badge only (Open / Dependent) |
+| Takeoff speed | multiplier drawn once | slow 30% (0.55–0.85), steady 40% (0.95–1.35), fast 30% (1.5–2.3) | No (hinted in words; revealed at the end) |
+
+**Keeping Confidence consistent** (`settleConfidence`, after every change): the margin is clamped to 3–30, then the estimate is clamped into truth ± margin. So the truth never leaves the band: when the truth falls far, it drags the estimate down with it.
 
 ## A card
 
-1. The card is drawn: forced cards first (tutorial, milestone news, Year in review, finale), then a due follow-up, then a weighted draw (weight 10 by default, Léa 25–30) among the eligible deck cards not yet seen this run, never the same speaker twice in a row (news excepted).
-2. The answer's effects apply; gauges and hidden tracks clamp to 0–100.
-3. Unless the card is a tutorial, Year in review or finale card, time moves: **0.75 month per card** (about three weeks), Safety drifts **−0.05**, Cooperation **−0.12**, and AI progress gains `1.45 × takeoff × max(0.65, 1 + 0.35 × (50 − Cooperation) / 50)`.
-4. A gauge at 0 or 100 ends the term (first gauge in the order Labs, Citizens, Allies, Oversight).
-5. Milestones whose threshold AI progress has crossed fire, in AI 2027's order, each forcing its news card. At each new year a Year in review comes first.
-6. At AI progress 100 the finale starts: the tipping-point card, then the US envoy, the Chinese delegate and The AI (each moves hidden tracks by 10–15), then Léa, then the ending. A gauge at 0 or 100 during the finale still ends the term early.
-7. After card 64 (December 2030) without a tipping point, the run ends on a plateau.
+1. The card is drawn: forced cards first (tutorial, milestone news, Year in review, finale), then a due follow-up, then a weighted draw (weight 10 by default, Léa 25–30) among the eligible deck cards not yet seen this game, never the same speaker twice in a row (news excepted).
+2. The answer's effects apply (`aiPower`, `cooperation`, `confidence` = the estimate, `margin`, `truth`, `cohesion`, `europe`), values clamp to 0–100, Confidence settles.
+3. Unless the card is a tutorial, Year in review or finale card, time moves **0.75 month** (about three weeks) and the drifts apply: Cooperation **−0.2** per card (**−0.15** more once AI power ≥ 60); Cohesion **−0.15** once AI power ≥ 60 and **−0.15** in the Rupture zone; the true Confidence **−0.15** once AI power ≥ 60; the estimate **+0.3** (the labs' reports); AI power gains `0.9 × takeoff × max(0.65, 1 + 0.35 × (50 − Cooperation) / 50)`.
+4. Cooperation, Confidence (estimate) or Cohesion at 0 ends the game early (checked in that order): Open conflict, Runaway incident, Breakdown.
+5. Milestones whose threshold AI power has crossed fire, in AI 2027's order, each forcing its news card. At each new year a Year in review comes first.
+6. At AI power 80 (all milestones fired) the finale starts: the tipping-point card, then the US envoy, the Chinese delegate and The AI, then Léa, then the ending. A pillar at 0 during the finale still ends the game early.
+7. After card 64 (December 2030) without a tipping point, the game ends on a plateau.
 
-**Milestone thresholds (AI progress):** China wakes 4 · AI takes jobs 10 · Agent-2 18 · theft 27 · superhuman coder 36 · alignment doubts 45 · self-improving AI 54 (The AI starts speaking) · cheap remote worker 63 · geopolitics 72 · Agent-4 81 · the leak 90 · tipping point 100.
+**Milestone thresholds (AI power):** China wakes 21 · AI takes jobs 24 · Agent-2 29 · theft 35 · superhuman coder 40 · alignment doubts 46 · self-improving AI 51 (The AI starts speaking) · cheap remote worker 57 · geopolitics 63 · Agent-4 68 · the leak 74 · tipping point 80.
 
-**Preview marks:** a change of 10 or more shows as a large dot ("a lot"), below 10 as a small dot ("a little"). Hidden tracks never show.
+**Preview marks:** a visible gauge moved by 8 or more shows a large dot ("a lot"), below 8 a small one ("a little"). Confidence gets a mark when its estimate or its margin moves. The true Confidence and Europe's AI lean never show.
+
+**Two incident news cards** enter the deck only while the true Confidence is low (`nw_self_copy` ≤ 42 after Agent-2, `nw_agent_fraud` ≤ 38 after the cheap remote worker): a careless world sees its AI misbehave in public, and the estimate falls.
 
 ## Endings
 
-**Early:** Labs 0 Exodus, 100 Capture · Citizens 0 Apathy, 100 Patchwork · Allies 0 Isolated, 100 Absorbed · Oversight 0 Blindsided, 100 Overreach.
+**Early:** Cooperation 0 → Open conflict · Confidence estimate 0 → Runaway incident · Cohesion 0 → Breakdown. Nothing ends at 100.
 
-**Final:** the world comes from Cooperation after the finale (Pause 60+, Race 30–59, Rupture below 30) or, with no tipping point, from Europe's AI (Plateau open or Plateau big labs). The good ending needs both thresholds:
+**Final (v3 tree, v3 thresholds):** the world comes from the Cooperation zone at the end of the finale, or, with no tipping point, from Europe's AI. Confidence means the **true** value.
 
-| World | Deciding value | Safety net | Good | Bad |
+| World | Deciding gauge | Safety net | Good | Bad |
 | --- | --- | --- | --- | --- |
-| Pause | Safety 65+ | Steadiness 60+ | Licensed utopia | Unstable pause |
-| Race | Safety 70+ | Steadiness 65+ | The cognitive revolution | Loss of control |
-| Rupture | Steadiness 85+ | Safety 45+ | Multipolar world | Hot war |
-| Plateau, open | Steadiness 65+ | Safety 30+ | A bright winter | Decentralised mayhem |
-| Plateau, big labs | Steadiness 65+ | Safety 30+ | The agent economy | Silicon blackmail |
+| Pause (60+) | Confidence 65+ | Cohesion 45+ | Licensed utopia | Unstable pause |
+| Race (30–59) | Confidence 75+ | Cohesion 55+ | The cognitive revolution | Loss of control |
+| Rupture (< 30) | Cohesion 82+ | Confidence 65+ | Multipolar world | Hot war |
+| Plateau, Open | Cohesion 60+ | Confidence 40+ | A bright winter | Decentralised mayhem |
+| Plateau, Dependent | Cohesion 60+ | Confidence 40+ | The agent economy | Silicon blackmail |
 
-**What decided it:** the three answers with the highest impact. Early endings: the answers that pushed the fatal gauge toward its edge. Final endings: 2 × |Safety| + 2 × |Cooperation| + 1.5 × |Europe| + 0.5 × the gauge changes.
+**Why it ended** (`whySentence`): one sentence from the deciding gauge or the safety net, as in v3.
+
+**What decided it:** the three answers with the highest impact. Early endings: the answers that pushed the fallen pillar down (for Confidence, also those that lowered the truth). Final endings: 2 × the deciding gauge + 1.5 × the safety net + 1.5 × Cooperation after a tipping point, or + 2 × Europe's AI on a plateau. At most one finale answer.
 
 ## Content conventions
 
-- **Right goes along, left refuses.** On requests the right answer usually raises the requester's gauge (US envoy and Chinese delegate: Allies; OpenBrain's CEO and the NimbusAI founder: Labs; the researcher, security chief and partner minister: Oversight; the union leader and journalist: Citizens) and the left answer lowers it. On news, the right answer is the active reaction (speak up, demand, fund). This is what makes one-sided play fail fast.
-- **Every answer costs something:** each side of a two-answer card lowers at least one gauge or hidden track (`tests/content.test.ts`). Requests move 1 to 3 gauges, by 2 to 20 points.
-- **Single-button cards** (Year in review, tipping point, some Léa cards) change nothing and are exempt.
-- **Goals unlock cards** through `when.goal`; the first-run deck has 117 cards, the full deck 132.
+- **Right goes along, left refuses.** On news, the active reaction is on the right.
+- **Directions** (realism): siding with Washington or pressure on Beijing lowers Cooperation; talks, hotlines and summits raise it, often at a small Cohesion cost (seen as soft) or trade friction. Audits, testing, readable reasoning and interpretability narrow the margin and raise the truth, and often lower the estimate (they find problems). Shortcuts (waived audits, unwatched AI, dropped safety chapters) raise the estimate, widen the margin and lower the truth. Open models move Europe's AI toward Open and cost truth or misuse. Social measures raise Cohesion at a cost to Europe's AI industry; spending costs Cohesion (money diverted), as in v3. Racing, theft and compute deals raise AI power; pauses and checks slow it.
+- **Every answer costs something:** each side of a two-answer card lowers Cooperation, the estimate, the truth, Cohesion or Europe's AI, widens the margin, or raises AI power (`tests/content.test.ts`). Answers move 1 to 4 values by at most 15.
+- **Single-button cards** (Year in review, tipping point, some Léa cards, the final Léa card) change nothing and are exempt.
+- **Goals unlock cards** through `when.goal`.
 
 ## Simulation
 
-`npm run sim` plays 2000 seeded runs per strategy (seeds 1–2000, no tutorial, first-run deck; `npm run sim -- 2000 all` with every goal unlocked). Strategies (`scripts/strategies.ts`): always left, always right, random, **balancer** (minimises the squared distance of the four gauges from 50, steeply penalising the edges; ignores hidden tracks) and **thoughtful** (the balancer, minus 60 × (2 × ΔSafety + ΔCooperation)). The skilled strategies read true effects: they stand for a player who has learned the game over many runs.
+`npm run sim` plays 2000 seeded games per strategy (seeds 1–2000, no tutorial, first-game deck; `npm run sim -- 2000 all` with every goal unlocked). Strategies (`scripts/strategies.ts`): always left, always right, random, **balancer** (reads only the visible gauges: keeps Cooperation, the low end of Confidence and Cohesion high, AI power slow) and **thoughtful** (reads the true effects: favours the true Confidence, Cooperation and Cohesion, never lets the estimate reach 0). The skilled strategies stand for a player who has learned the game over many games.
 
-### Results (2000 runs per strategy, first-run deck)
+### Results
 
-| Strategy | Dies within 20 cards | Survives to the end | Median run | Tipping point | Good ending |
-| --- | --- | --- | --- | --- | --- |
-| Always left | 99.0% | 0% | 13 | 0% | 0% |
-| Always right | 93.2% | 0% | 13 | 0% | 0% |
-| Random | 36.1% | 11.3% | 25 | 12.9% | 0.4% |
-| Balancer | 0% | 100% | 52 | 69.2% | 36.0% |
-| Thoughtful | 0% | 100% | 62 | 54.0% | 70.2% |
-
-Every ending reaches at least 1% for some strategy (rarest: Licensed utopia 27.4% for thoughtful; The cognitive revolution 1.7% thoughtful; Multipolar world 8.9% balancer; Absorbed 2.0% always right; Capture 1.3% always right and random). For every character, both answers appear in good-ending runs. Tipping point year: 2028 23%, 2029 36%, 2030 40%. With every goal unlocked: always left 97.8%, always right 91.0%, random 10.8% / median 25, balancer 100% / 35.9% good, thoughtful 74.7% good.
+To be filled by the rebalancing (step 3).
 
 ## Tuning changes
 
-| # | Change | Old → new | Why | Effect (2000 runs unless noted) |
+| # | Change | Old → new | Why | Effect (2000 games unless noted) |
 | --- | --- | --- | --- | --- |
-| 1 | First balance pass on request effects: right raises the requester's gauge, left lowers it; costs on other gauges kept at 3–6 | mixed directions, costs up to 8 | Always-left and always-right survived far too long (59.7% and 19% died within 20 cards, 1000 runs) | Always left 87%, always right 34% |
-| 2 | Requester's gauge scaled ×1.25 on the right answer and ×1.15 on the left (cap 20) | e.g. 10–12 → 12–15 | One-sided play still drifted too slowly | Always left 96%, always right 62%; random median 28 → 25 |
-| 3 | News reactions ordered like requests: the active reaction (speak up, demand, fund) on the right | 15 news and follow-up cards swapped sides | News cards diluted the yes-drift | Always right 94%; random unchanged |
-| 4 | Refusing a risky shortcut protects Safety (+2 to +3 on 12 left answers); finale swings on Safety 12 / 15 → 10 / 12 | — | Safety collapsed for anyone not chasing it (balancer median 8) | Balancer Safety median 8 → 25 |
-| 5 | Safety start 50 → 60; Safety drift −0.3 → −0.05 per card; Cooperation drift −0.15 → −0.12 | see left | Balancer good ending was 0–5%, thoughtful 30% | Balancer 36%, thoughtful 70% |
-| 6 | Ending thresholds (offline grid search over the final states, which do not change play) | Pause 60/55 → 65/60; Race 70/60 → 70/65; Rupture 75/60 → 85/45; Plateau 60/40 → 65/30 | Put balancer near 35% and thoughtful near 67% with every ending ≥ 1% | All targets met |
-| 7 | Small content fixes (one label shortened, one cost added) | — | Content tests | No measurable change |
+| R0 | Rework onto the v3 world model; every card remapped by hand; first-guess sizes (main effect 5–10, costs 2–6) | Envoy model (table below) | Playtest: the game must be about the world, with v3's gauges | 500 games, before any tuning: always left 0% good, always right 25%, random 1% good / 15% early, balancer 92%, thoughtful 100%; Runaway incident 0% |
+
+### Envoy model (retired 26 October 2026)
+
+| # | Change | Old → new | Why | Effect |
+| --- | --- | --- | --- | --- |
+| 1 | Right raises the requester's gauge, left lowers it | mixed directions | One-sided play survived too long | Always left 87%, always right 34% dead within 20 cards |
+| 2 | Requester's gauge ×1.25 right, ×1.15 left | e.g. 10–12 → 12–15 | Still too slow | 96% / 62% |
+| 3 | News: active reaction on the right | — | Diluted drift | Always right 94% |
+| 4 | Refusing shortcuts protects Safety; finale swings 10 / 12 | — | Safety collapsed | Balancer Safety median 8 → 25 |
+| 5 | Safety start 60, drifts −0.05 / −0.12 | 50, −0.3 / −0.15 | Too few good endings | Balancer 36%, thoughtful 70% |
+| 6 | Ending thresholds (grid search) | see the old spec | Targets | All met |
+| 7 | Small content fixes | — | Content tests | — |

@@ -1,63 +1,60 @@
 # Build notes
 
-Built overnight on 25–26 October 2026 from `docs/SPEC.md`, alone, with no one to ask: every judgement call is written down here. Infrastructure copied and adapted from `takeoff-middle-power` (read only).
+Built overnight on 25–26 October 2026 from `docs/SPEC.md`, then **reworked on 26 October 2026** onto the world model of *Middle Power* v3 after the owner's playtest. Every judgement call is written down here. Infrastructure copied and adapted from `takeoff-middle-power` (read only).
 
-## What was built
+## The rework (26 October 2026)
 
-- **The game**: a mobile-first swipe game. Four gauges (Labs, Citizens, Allies, Oversight) start at 50 and end the term at 0 or 100 (8 early endings). Hidden Cooperation, Safety and Europe's AI, plus Steadiness from the gauges. About three weeks per card, an AI progress bar with a hidden takeoff speed, AI 2027's eleven milestones in order, a Year in review each January, the tipping-point finale (full-screen card, three final requests, Léa, the ending) or a plateau after December 2030 (10 final endings, the v3 tree).
-- **Interaction**: drag the card, or use the two real answer buttons (first click previews with marks on the gauges, second click confirms), or the keyboard (← → / Enter / Escape). Announcements in words through `aria-live`, focus management on every screen, reduced motion (fade, no fly, no pulse).
-- **Replay**: "Envoy #N", an Archive of all 18 endings, 15 goals (three shown at a time) that unlock 15 cards. All saved in localStorage behind try/catch; the game works without it.
-- **End screen**: title, text, the idea behind it (early endings), "What decided it" (three answers with dates), "What you could not see" (Cooperation, Safety, Europe's AI and Steadiness in words, with a bar and the number, plus the takeoff speed), "In reality" with sourced facts, goals completed, Play again and Archive.
-- **Engineering**: pure engine with the seeded RNG in state, declarative data with every number in `tuning.ts`, string-template UI with escaping, Vitest (43 tests), Playwright e2e (9 tests on the production build with its CSP), the axe and keyboard-only harness (`npm run a11y`), ESLint, seeded `npm run sim`, a screenshot script, GitHub Actions deploy with SHA-pinned actions and least-privilege permissions.
+**Why.** The first version was about the envoy's career: four political forces (Labs, Citizens, Allies, Oversight) and "dying" meant losing the mandate. The owner asked for a game about the future of the world, with the same gauges as v3 and the hybrid, so the three versions tell the same story three ways. The design stays centred on the cards.
+
+**What changed.**
+- **Gauges**: AI power 18 (the clock, tipping point 80), Cooperation 52 (zones Pause 60+, Race 30–59, Rupture < 30), Confidence 55 ± 15 (estimate and margin; a true value 52 hidden inside, revealed at the end), Cohesion 66, and the Europe's AI badge (Dependent). Labs, Citizens, Allies, Oversight and Steadiness are gone. Start values, zones and thresholds are v3's (`tom-v3/src/data/tuning.ts`, read on 26 Oct; Rupture's target is 82 there, not 85 as in the v3 spec).
+- **Endings**: three early world catastrophes at 0 (Open conflict, Runaway incident, Breakdown), none at 100; the ten final endings follow the v3 tree on the true Confidence and Cohesion. 13 in the Archive.
+- **Cards**: the cast, texts and bases are kept. Every answer was remapped by hand onto the new gauges (see "Remapping choices" below). One text rewritten because it only made sense for the envoy's image (`jo_poll`: now "phase OpenBrain's models out of public services?"). Two incident news cards added (`nw_self_copy`, `nw_agent_fraud`), drawn only while the true Confidence is low. The tutorial and the Year in review were rewritten for the new gauges; the Year in review hints in words at the true Confidence (vs the estimate), Europe's AI and the pace.
+- **Framing**: "Game #N" instead of "Envoy #N"; goals rewritten around worlds and gauges; the end screen gives the one-sentence reason, the estimate you saw next to the truth, and the four gauges with the world's target and safety net. Saved progress uses a new key (`takeoff-reign-version:v2`), so earlier archives start fresh.
+- **Look**: v3's visual charter (night background, deck panels, gauge colours and fonts), the request on a paper card. Same interaction and accessibility as before.
+- **Pushed in three steps** at the owner's request: (1) playable rework, (2) tests, a11y harness and docs, (3) rebalancing.
+
+**Remapping choices** (directions follow the scenarios; sizes are tuned by the simulation):
+- Answers that moved *Allies* by siding with Washington now lower Cooperation (Beijing sees a bloc); refusing Washington costs Cohesion (trade friction) or Europe's AI (chip access).
+- Answers that moved *Oversight* now narrow or widen the Confidence margin, and move the true Confidence when they change what gets fixed. Audits and published findings often lower the estimate: checking finds problems. Shortcuts raise the estimate while the truth falls: the core lesson of the margin.
+- Answers that moved *Labs* now move Europe's AI (dependence on OpenBrain, support for NimbusAI), AI power (fast-tracking, compute) and the truth (skipped checks).
+- Answers that moved *Citizens* now move Cohesion; social measures cost Europe's AI industry a little, spending costs Cohesion (money diverted, as in v3).
+- Old *Safety* effects map onto the true Confidence; old *progress* effects onto AI power.
 
 ## Card counts
 
-132 cards (117 in the first-run deck, 15 unlocked by goals):
+134 cards (119 in the first-game deck, 15 unlocked by goals):
 
 | Kind | Count |
 | --- | --- |
 | Requests | 73: 8 each for the US envoy, the Chinese delegate, OpenBrain's CEO, the safety researcher, the union leader, the NimbusAI founder, the security chief and the partner minister; 9 for the journalist |
 | Follow-ups | 14 (12 chains triggered by an answer, plus the 2-card journalist chain on the stolen weights) |
-| News | 17: 11 milestone news (forced, AI 2027 order) and 6 others |
-| The AI | 9 (from "self-improving AI"; two of them chosen by the hidden Safety value) |
-| Léa | 8 (three single-button, two whose text hints at a hidden track) |
+| News | 19: 11 milestone news (forced, AI 2027 order), 6 others, 2 incidents (only when the true Confidence is low) |
+| The AI | 9 (from "self-improving AI"; two of them chosen by the hidden true Confidence) |
+| Léa | 8 (three single-button, two whose text hints at a hidden value) |
 | Year in review | 3 (January 2028, 2029, 2030) |
-| Tutorial | 3 (first run only) |
+| Tutorial | 3 (first game only) |
 | Finale | 5 (tipping point, US envoy, Chinese delegate, The AI, Léa) |
 
-**Basis:** 62 cards rest on AI 2027, 24 on CFG, 46 on a real source. **Learn more:** 103 cards (78%): 46 real facts and 57 scenario facts, the latter always labelled "In AI 2027…" or "In the CFG scenarios…". 42 cards are gated by a milestone.
+**Basis:** 64 cards rest on AI 2027, 25 on CFG, 45 on a real source. **Learn more:** 105 cards. 44 cards are gated by a milestone.
 
 ## Decisions
 
-1. **Effect convention.** On every request, the right answer goes along with the requester and raises their gauge, and the left answer refuses and lowers it. On news, the active reaction is on the right. Without this, one-sided play did not die fast enough (see the tuning table). Exceptions where the request itself asks to stand down (the union's "quiet deal", the founder's "open weights mandate") are kept for realism.
-2. **Allies is one gauge for both superpowers**, as the spec says: going along with Washington or with Beijing raises it, and the partner minister's middle-power moves lower it.
-3. **Hidden tracks.** Cooperation starts at 45 and Safety at 60, and both erode slowly every card ("the race pushes safety testing to the back", CFG Take-off). Europe's AI is a 0–100 value: Open at 50+, starting at 42 (dependent), moved by about 15 specific answers.
-4. **Takeoff speed** is drawn from three bands (slow, steady, fast). The tipping point comes in 2028 (23%), 2029 (36%) or 2030 (40%), or not at all (31% of balancer runs).
-5. **Ending thresholds** were set by an offline grid search over the final states of 800 runs per strategy. This works because the thresholds do not change how any strategy plays. The final values are close to the spec's (Pause 65/60, Race 70/65, Rupture 85/45, Plateau 65/30); see `DEVELOPER_NOTES.md`.
-6. **"What decided it"** shows at most one of the finale's three answers. Otherwise the large finale swings would always fill the list.
-7. **A tutorial guide.** The spec's cast has no narrator, so the tutorial and the Year in review come from **Noor, your chief of staff**, an added fictional character.
-8. **Names.** The cast got fictional names (Grant Holloway, Wei Lan, Marcus Reed, Dr Amara Okafor, Bruno Ferreira, Sanna Lindqvist, Col. Ines Marchetti, Kenji Mori, Clara Novak). The founder's lab is **NimbusAI**, CFG's fictional EU champion. OpenBrain, DeepCent and Agent-2/3/4 come from AI 2027.
-9. **Single-button cards** (Year in review, the tipping point, three Léa cards, the final Léa card) change nothing and are exempt from "every answer costs something". The test applies to every two-answer card.
-10. **The game starts in January 2027**, but its milestones follow AI 2027 from "China wakes up" (mid-2026 in the scenario). The scenario's calendar is replaced by the AI progress meter, as the spec asks.
-11. **Visual design**: a cool official-stationery blue (#DCE3EC), navy ink, white playing cards with a solid offset shadow, and one signal yellow (#F5C518) for the chosen answer. Bricolage Grotesque for display and Atkinson Hyperlegible for body text, both from Google Fonts. Portraits are original flat shapes (circles and paths).
-12. **Screenshots** use fallback fonts: the sandbox cannot reach Google Fonts, so the scripts stub them.
+1. **Effect convention.** On every request, the right answer goes along with the requester, the left answer refuses. On news, the active reaction is on the right.
+2. **Europe's AI** is a hidden 0–100 lean behind a visible badge (Open at 50+). Many answers nudge it; the badge flips only past 50, and the flip is announced. Preview marks never show it (like the truth), so the player learns which cards move it from their text.
+3. **Confidence preview.** A Confidence mark appears when an answer moves the estimate or the margin. Changes to the true value alone show nothing, by design: that is what "you cannot see the truth" means.
+4. **The estimate dies, not the truth.** "Confidence reaching 0" uses the public estimate, as the spec asks. Because the estimate is kept within truth ± margin, a collapsing truth drags it down, and incidents (only drawn when the truth is low) push it down in public.
+5. **A pillar at 0 during the finale** still ends the game early (consistent with the rest of the game).
+6. **Takeoff speed** is drawn from three bands; AI power's per-card rise is scaled so the old timing holds (tipping point mostly in 2029–2030, some in 2028, none for slow games).
+7. **"What decided it"** shows at most one of the finale's three answers.
+8. **A tutorial guide.** Noor, your chief of staff (an added fictional character), runs the tutorial and the Year in review.
+9. **Names.** The cast keeps its fictional names (Grant Holloway, Wei Lan, Marcus Reed, Dr Amara Okafor, Bruno Ferreira, Sanna Lindqvist, Col. Ines Marchetti, Kenji Mori, Clara Novak). The founder's lab is **NimbusAI**, CFG's fictional EU champion.
+10. **Single-button cards** change nothing and are exempt from "every answer costs something".
+11. **Screenshots** use fallback fonts: the sandbox cannot reach Google Fonts, so the scripts stub them. Big Shoulders Display is condensed; the fallback is wider, so the phone layout hides the small logo below 440 px to stay within the viewport either way.
 
 ## Simulation (final)
 
-2000 seeded runs per strategy, first-run deck (`npm run sim`):
-
-| Strategy | Target | Result |
-| --- | --- | --- |
-| Always left | dies within 20 cards > 90% | **99.0%** (median 13 cards; Blindsided 70%, Apathy 13%, Isolated 11%, Exodus 7%) |
-| Always right | dies within 20 cards > 90% | **93.2%** (median 13; Patchwork 51%, Overreach 46%) |
-| Random | survives < 20%; median 20–30 | **11.3%** survive; median **25** cards |
-| Balancer | survives > 60%; good 25–45% | **100%** survive; **36.0%** good |
-| Thoughtful | good 55–80% | **70.2%** good |
-| All | each of 18 endings ≥ 1% for some strategy | **met** (rarest: Capture 1.3%, The cognitive revolution 1.7%, Absorbed 2.0%) |
-| Extra | both answers of every character in winning runs | **met** |
-| Extra | each answer lowers something | **met** (content test) |
-
-With every goal unlocked (`npm run sim -- 2000 all`) all targets still hold (always right 91.0%, balancer 35.9% good, thoughtful 74.7% good).
+To be filled by the rebalancing (step 3); see `docs/DEVELOPER_NOTES.md`.
 
 ## Realism notes
 
@@ -79,16 +76,17 @@ For Louis and the fact-check: every place where the game interprets or stretches
 10. "Hollywood writers won AI limits" (union card) is a real precedent from the US film industry, applied to European translators and voice actors.
 11. `fo_paris` says a Paris lab "matched bigger models". Mistral's post says Mixtral outperforms Llama 2 70B on most benchmarks; the comparative size of the two models was not checked on the page.
 
-**Early endings: real mechanism, sourced precedent, extrapolated**
+**Early endings (world catastrophes, extrapolated from the scenarios)**
 
-12. **Exodus**: Meta withholding a multimodal model from the EU (2024) concerns one company and one product; the ending extrapolates to the labs and researchers leaving.
-13. **Capture**: Corporate Europe Observatory documents lobbying intensity (2023), not capture as such; the replaced envoy is invented.
-14. **Apathy**: the Commission's withdrawal of the AI Liability Directive (approved 16 July 2025, Council document ST-13873-2025) is the precedent. Its stated reason ("no foreseeable agreement") comes only from a secondary source (IAPP), so the game states the withdrawal without a reason.
-15. **Patchwork**: the Italian Garante's 2023 temporary limitation of ChatGPT was a single authority acting on privacy. The ending extrapolates to many member states and to AI services in general.
-16. **Isolated**: the US AI Diffusion Rule (January 2025) put 17 EU states under caps, but it was rescinded in May 2025 before its compliance dates. The ending imagines a harsher version, plus a cloud freeze.
-17. **Absorbed**: the EU's intent to buy at least $40 billion of US AI chips is a trade-framework commitment; the ending extrapolates to Europe losing its voice.
-18. **Blindsided**: Anthropic's November 2025 case targeted tech firms, financial institutions, chemical makers and government agencies, not specifically EU ministries.
-19. **Overreach**: *Digital Rights Ireland* (2014) concerned telecom data retention; the ending applies the same Charter reasoning to AI conversation logs.
+12. **Open conflict** (Cooperation 0): CFG's Arms race (chokepoints as weapons, no way to verify) and AI 2027's theft aftermath (failed US cyber retaliation, military moves around Taiwan). The ending stops short of CFG's hot war: no strikes, only the conflict that closes the story. The Dutch export controls are a real precedent for chips as a front line, not for conflict.
+13. **Runaway incident** (Confidence 0): CFG Diplomacy's warning shot (an AI copying itself to rented servers) made uncontainable; AI 2027's Agent-2 "could survive and replicate if it escaped". Apollo Research's tests (models copying what they believed were their weights) are lab experiments, not incidents in the wild.
+14. **Breakdown** (Cohesion 0): AI 2027's job turmoil and protests, and the IMF's exposure estimate, extrapolated to strikes and falling governments across Europe. Neither source predicts a breakdown.
+
+**The world model**
+
+15. Cooperation, the true Confidence and Cohesion as the decisive values, and the five worlds, are v3's mapping of CFG (see `takeoff-middle-power/docs/V3_SPEC.md`), not CFG's own axes (speed and concentration).
+16. Several remapped effects are interpretations: refusing Washington costing Cohesion (trade friction), social measures costing Europe's AI industry, diplomacy costing Cohesion (seen as soft on rivals, as in v3's talks card). They are listed in "Remapping choices" above.
+17. The two incident news cards (`nw_self_copy`, `nw_agent_fraud`) are fiction labelled "In this story", after CFG Diplomacy's warning shot and AI 2027's Agent-3 fabricating data.
 
 **Sources**
 
@@ -106,9 +104,9 @@ Every source in `src/data/sources.ts` was opened with WebFetch on 25 October 202
 
 ## Known issues
 
-1. **GitHub Pages is not enabled yet.** The workflow has created `gh-pages`; the owner must turn it on in Settings → Pages → Deploy from a branch → `gh-pages` / root. Until then the URL returns 404.
-2. **No human playtest yet.** The balance rests on simulated strategies that read the true effects of each answer. The balancer survives 100% of runs, which may make the game feel easy for a practised player; a real player only sees marks without directions. The spec's playtest (five people, three runs each) is still to do.
+1. **GitHub Pages** must be enabled (Settings → Pages → Deploy from a branch → `gh-pages` / root) for the URL to work.
+2. **No human playtest of the world model yet.** The balance rests on simulated strategies that read the true effects of each answer; a real player only sees marks without directions.
 3. **Voices and Learn more lines await Louis's review and the fact-check** (see the realism notes). 57 of the 103 Learn more lines describe the scenarios rather than real facts.
 4. The web fonts could not be seen in this sandbox (no network for the browser). Screenshots use fallback fonts, so typography should be checked once on the live site.
-5. Under reduced motion, the "+12" delta badges on the gauges stay visible until the next answer, on purpose, so state changes stay visible. With full motion they fade after about 1.8 s.
+5. The "+4" delta badges on the gauges stay visible until the next answer, so state changes stay visible with or without motion.
 6. "What decided it" scores answers by how much they moved the values that decide that kind of ending (for example, Europe's AI and Safety on a plateau). It does not trace causality, so it is a good summary rather than a proof.

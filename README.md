@@ -1,6 +1,6 @@
 # Takeoff: Reign Version
 
-A short, replayable swipe game about AI governance. You are the EU's AI Envoy: people bring you requests one at a time, and you answer left or right. Keep Labs, Citizens, Allies and Oversight away from 0 and 100 until AI reaches its tipping point, or the end of 2030. What you could not see (whether Washington and Beijing cooperate, whether the AI is truly safe, whether Europe's AI is open) decides which of ten endings you get.
+A short, replayable swipe game about AI governance. You are the EU's AI Envoy: people bring you requests one at a time, and you answer left or right. Every answer moves the world, on the same gauges as Takeoff: Middle Power v3: AI power (the clock), Cooperation between Washington and Beijing, Confidence in AI (an estimate whose true value is revealed at the end) and Cohesion, plus Europe's AI (Open or Dependent). If Cooperation, Confidence or Cohesion falls to 0, the world breaks early; otherwise the world you shaped decides which of ten endings you get at AI's tipping point, or at the end of 2030.
 
 Play: https://damienlethiec.github.io/takeoff-reign-version/
 
@@ -15,7 +15,7 @@ Play: https://damienlethiec.github.io/takeoff-reign-version/
 npm install
 npm run dev        # http://localhost:5173/takeoff-reign-version/  (?seed=N, ?notutorial, ?fresh)
 npm test           # unit tests: content rules, engine, balance guardrails, UI helpers
-npm run sim        # 2000 seeded runs per strategy, checked against the spec's targets
+npm run sim        # 2000 seeded games per strategy, checked against the spec's targets
 npm run build      # production build in dist/, with a Content-Security-Policy meta tag
 npm run lint
 npm run test:e2e   # Playwright on the production build

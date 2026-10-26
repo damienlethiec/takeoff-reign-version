@@ -29,7 +29,7 @@ async function shoot(viewport, tag) {
   };
   await page.goto(`${server.url}?seed=8&fresh`);
   await snap('01-title');
-  await page.getByRole('button', { name: /Start your term/ }).click();
+  await page.getByRole('button', { name: /Start game/ }).click();
   await snap('02-tutorial');
   for (let i = 0; i < 3; i++) {
     await page.locator('.answer').last().click();
@@ -51,7 +51,9 @@ async function shoot(viewport, tag) {
       if (!c.right) return 'only';
       const cost = (side) => {
         const e = eng.answerOf(c, side).effects;
-        return ['labs', 'citizens', 'allies', 'oversight'].reduce((a, g) => a + (Math.min(100, Math.max(0, s.gauges[g] + (e[g] ?? 0))) - 50) ** 2, 0) - 40 * ((e.safety ?? 0) + (e.coop ?? 0));
+        // a careful player: keeps the three pillars high (reads the true effects, like the simulation's thoughtful player)
+        const v = (k) => Math.min(100, Math.max(0, s.w[k] + (e[k] ?? 0)));
+        return ['cooperation', 'truth', 'cohesion'].reduce((a, k) => a + (100 - v(k)) ** 2, 0) + (v('confidence') <= 5 ? 1e6 : 0);
       };
       return cost('left') <= cost('right') ? 'left' : 'right';
     });
@@ -74,9 +76,9 @@ async function shoot(viewport, tag) {
   await snap('06-menu');
   await page.keyboard.press('Escape');
   // play on; capture a delta right after an answer, a review, the tipping point and the ending.
-  // If a term ends without the tipping point, play another (up to four) to capture the finale.
+  // If a game ends without the tipping point, play another (up to four) to capture the finale.
   const seen = new Set();
-  for (let term = 0; term < 4; term++) {
+  for (let game = 0; game < 4; game++) {
     for (let i = 0; i < 160; i++) {
       if ((await page.locator('#app').getAttribute('data-screen')) === 'ending') break;
       const kind = await page.evaluate(() => [...(document.querySelector('#card')?.classList ?? [])].find((c) => c.startsWith('kind-')));
@@ -86,9 +88,9 @@ async function shoot(viewport, tag) {
           await snap(`07-${k.slice(5)}`);
         }
       await step();
-      if (term === 0 && i === 2) await snap('08-after-answer');
+      if (game === 0 && i === 2) await snap('08-after-answer');
     }
-    if (seen.has('kind-tipping') || term === 3) break;
+    if (seen.has('kind-tipping') || game === 3) break;
     await page.getByRole('button', { name: /Play again/ }).click();
   }
   await snap('09-ending');

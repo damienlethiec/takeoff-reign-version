@@ -86,7 +86,9 @@ async function playRun(browser, base, run) {
       if (!c.right) return 'only';
       const cost = (side) => {
         const e = eng.answerOf(c, side).effects;
-        return ['labs', 'citizens', 'allies', 'oversight'].reduce((a, g) => a + (Math.min(100, Math.max(0, s.gauges[g] + (e[g] ?? 0))) - 50) ** 2, 0) - 40 * ((e.safety ?? 0) + (e.coop ?? 0));
+        // a careful player: keeps the three pillars high (reads the true effects, like the simulation's thoughtful player)
+        const v = (k) => Math.min(100, Math.max(0, s.w[k] + (e[k] ?? 0)));
+        return ['cooperation', 'truth', 'cohesion'].reduce((a, k) => a + (100 - v(k)) ** 2, 0) + (v('confidence') <= 5 ? 1e6 : 0);
       };
       return cost('left') <= cost('right') ? 'left' : 'right';
     });
@@ -155,8 +157,8 @@ async function playRun(browser, base, run) {
     await wait(run.reducedMotion === 'reduce' ? 260 : 340);
     if ((await screenOf(page)) === 'game' && step > 0) {
       const t = await said();
-      if (!/up|down|Nothing you can see/.test(t)) fail(`no announcement after an answer ("${t}")`);
-      if (/safety|cooperation|progress/i.test(t)) fail(`an announcement leaked a hidden track ("${t}")`);
+      if (!/up|down|certain|now (Open|Dependent)|Nothing you can see/.test(t)) fail(`no announcement after an answer ("${t}")`);
+      if (/truth|true value|safety|takeoff|\b(slow|fast) pace/i.test(t)) fail(`an announcement leaked a hidden value ("${t}")`);
     }
   }
 
@@ -177,7 +179,7 @@ async function playRun(browser, base, run) {
     if (!(await tabTo(page, '[data-act="again"]'))) fail('ending: could not Tab to Play again');
     await press('Enter');
     await wait(300);
-    if ((await screenOf(page)) !== 'game' || !/Envoy #2/.test(await page.evaluate(() => document.querySelector('.envoy')?.textContent ?? ''))) fail('Play again did not start Envoy #2');
+    if ((await screenOf(page)) !== 'game' || !/Game #2/.test(await page.evaluate(() => document.querySelector('.game-n')?.textContent ?? ''))) fail('Play again did not start game #2');
   }
   await context.close();
   return { problems, errors, audits, log };

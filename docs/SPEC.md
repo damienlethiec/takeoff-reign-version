@@ -1,174 +1,121 @@
 # Takeoff: Reign Version Spec
 
-Oct 25, 2026 · @Damien
+Oct 26, 2026 · @Damien (rework of the Oct 25 spec: the world model of v3)
 
 ## What the game is
 
-A short, replayable swipe game in the spirit of *Reigns*. You are the EU's AI Envoy. People bring you one request at a time, and you answer **left or right**. Each answer moves **four gauges**. If any gauge hits **0 or 100**, your term ends early. If you hold on until the AI reaches its tipping point (or until the end of 2030), the state of the world decides which of the **ten endings** you get.
+A short, replayable swipe game in the spirit of *Reigns*. You are the EU's AI Envoy. People bring you one request at a time, and you answer **left or right**. Each answer moves the state of the **world**, on the same gauges as *Takeoff: Middle Power* v3 and its hybrid. If Cooperation, Confidence or Cohesion falls to **0**, the world breaks before AI reaches its tipping point. Otherwise, at the tipping point (or at the end of 2030), the world you have shaped decides which of the **ten final endings** you get.
 
-**Why this version.** The full game asks players to learn a model before they can play. Here there is nothing to learn: read a card, pick a side, see what moved. A run takes 3 to 12 minutes. Dying early is part of the fun, and each death teaches one idea ("Leaving the labs alone let them write the rules"). Replays do the teaching that tutorials did in Middle Power.
+**Why this version.** The three versions tell the same story with the same gauges and endings, played three ways: a map and policy cards (v3), the hybrid, and here one card at a time. There is nothing to learn: read a card, pick a side, see what moved. A game takes 3 to 12 minutes. Early collapses are part of the fun, and each one teaches one idea ("Nobody could check what the models really did").
 
-**What it keeps from Middle Power:** the scenario (OpenBrain, DeepCent and the 2027 timeline, always labelled as fiction), the ten endings from the CFG scenario, the cast from the hybrid spec, Léa, and the house rules: every real fact has a primary source, card text is short and plain, and the game is fully accessible.
+**Why the rework (Oct 26).** The first version was about the envoy's career: four political forces (Labs, Citizens, Allies, Oversight) and "dying" meant losing the mandate. Playtest feedback: the game must be about the future of the world (alignment, cooperation, society), like its sister versions, and use the same gauges. The design stays centred on the cards.
 
-**What it drops:** the map, Influence, policy cards, the advisor, the round structure and the report screen.
+**What it keeps from Middle Power:** the scenario (OpenBrain, DeepCent and the 2027 timeline, always labelled as fiction), the gauges and the ten CFG endings of v3, the cast, Léa, and the house rules: every real fact has a primary source, card text is short and plain, and the game is fully accessible.
 
 It lives in its own repository, `damienlethiec/takeoff-reign-version`, published on GitHub Pages.
 
-## The four gauges
+## The gauges (same as v3)
 
-Each gauge is a force that weighs on Europe's AI policy. All four start at 50. Too little is fatal, and so is too much: that is the lesson the format teaches for free.
-
-| Gauge | What it measures | At 0 | At 100 |
+| On screen | Start | What it is | Ends the game |
 | --- | --- | --- | --- |
-| **Labs** | The weight of AI companies in Europe | **Exodus.** Labs and talent leave. Europe has no AI and no seat at the table. | **Capture.** Lobbyists write the rules. You are replaced by a friendlier envoy. |
-| **Citizens** | How mobilised the public is on AI | **Apathy.** Nobody cares. The Council ignores you and your mandate is not renewed. | **Patchwork.** Member states act alone, each suspending or banning AI services its own way. The market splits and you are sidelined. |
-| **Allies** | How close Europe is to Washington and Beijing | **Isolated.** Sanctions and cut-off chips. Europe cannot train or run anything. | **Absorbed.** Europe signs whatever it is asked. Its voice disappears. |
-| **Oversight** | Europe's capacity to see what AI systems do | **Blindsided.** A major incident nobody saw coming. You take the blame. | **Overreach.** Your rules make providers keep every AI conversation. The EU Court annuls them, and the Commission drops you. |
+| **AI power** (the clock) | 18 | How close AI is to the **tipping point**, when it can do AI research by itself. Tipping point at **80** | At 80: the finale |
+| **Cooperation** | 52 | Trust between the US and China. Zones: **Pause** 60+, **Race** 30–59, **Rupture** below 30 | At 0: **Open conflict** |
+| **Confidence** in AI | 55 ± 15 | How far we can trust the AI systems: an **estimate with a margin**. A hidden true value always lies inside the margin and is revealed at the end | Estimate at 0: **Runaway incident** |
+| **Cohesion** | 66 | Whether European society holds: jobs, trust, misuse, who holds power | At 0: **Breakdown** |
+| **Europe's AI** (badge) | Dependent | **Open** or **Dependent**: does Europe run models it controls, or rely on a few big labs? | Picks the world on a plateau |
 
-**Before answering**, the player sees which gauges will move and roughly how much (a small or a large mark), but not in which direction, as in *Reigns*. The direction is shown after the answer, with + / − and words.
+Nothing ends at 100. Margin changes are shown in words: "Confidence: less certain (±15 → ±17)" or "more certain".
 
-**Hidden tracks.** Three values the player never sees as numbers decide the final ending:
+**Before answering**, the player sees which gauges will move and roughly how much (a small or a large dot), but not in which direction, as in *Reigns*. The direction is shown after the answer, with + / − and words. The true Confidence, the hidden lean behind Europe's AI badge and the takeoff speed never show as numbers before the end.
 
-- **Cooperation** between the US and China (0–100). Sets the world: Pause, Race or Rupture.
-- **Safety**: how aligned the leading AI truly is (0–100). Characters hint at it; the truth is revealed at the end.
-- **Europe's AI**: Open or Dependent, flipped by a few specific answers.
-
-A fourth value, **Steadiness**, comes from the gauges themselves: the closer all four are to the middle, the higher it is (100 when all are at 50). It plays the role of Cohesion in v3. So surviving well also means ending well.
-
-Once a year, a **Year in review** card describes the hidden tracks in words only ("Washington and Beijing are drifting apart. Nobody is sure the new models do what they say.").
+**Once a year**, a **Year in review** card says in words what the gauges cannot show: whether the labs sound surer than the truth, how Europe's own models are doing, how fast progress feels.
 
 ## Time and the tipping point
 
-**Each card moves time forward about three weeks.** The date is shown under the gauges ("March 2027"). A run that survives to the end of 2030 sees about 64 cards.
+**Each card moves time forward about three weeks.** The date is shown above the gauges. A game that reaches the end of 2030 sees about 64 cards.
 
-**AI progress** is the only other visible meter: a thin bar labelled "AI progress". It rises a little with every card, faster when the race heats up (low Cooperation, compute deals, stolen models) and slower after pauses or inspections. When it reaches the top, the **tipping point** begins.
+**AI power** rises with every card at a hidden pace (the takeoff speed, drawn at the start: slow, steady or fast), faster when Cooperation is low. A few answers nudge it (racing, stolen weights, compute deals up; pauses, checks down). AI 2027's milestones fire in the scenario's order as AI power crosses them, each with its news card; the tipping point only comes after all of them.
 
 **The finale** replaces the normal deck:
 
-1. A full-screen card: "The models now improve themselves." No gauges move.
-2. Three final requests, one each from the US envoy, the Chinese delegate and The AI. Their answers move the hidden tracks strongly. The gauges still apply: a gauge at 0 or 100 here still ends the run.
-3. A Léa card that reflects the state of the world.
+1. A full-screen card: "The models now improve themselves." Nothing moves.
+2. Three final requests, from the US envoy, the Chinese delegate and The AI. They move Cooperation (which picks the world) and the true Confidence strongly. A pillar at 0 here still ends the game early.
+3. A Léa card that reflects the world reached.
 4. The ending.
 
-If AI progress never reaches the top by December 2030, the run ends on a **plateau** (the AI did not tip), and the ending comes from Europe's AI and Steadiness, as in v3.
+If AI power never reaches 80 by December 2030, the game ends on a **plateau**, and Europe's AI badge picks the world.
 
-The speed of AI progress has a hidden random part drawn at the start of each run (the takeoff speed), so the tipping point can come in 2028 or not at all. The seeded RNG makes every run reproducible.
+## The ten final endings (the v3 tree)
+
+```
+End of the game (tipping point reached, or December 2030)
+├─ Tipping point reached → Cooperation zone at that moment
+│   ├─ Pause (60+)       Decides: Confidence 65+  Safety net: Cohesion 45+   ✓ Licensed utopia      ✗ Unstable pause
+│   ├─ Race (30–59)      Decides: Confidence 75+  Safety net: Cohesion 55+   ✓ Cognitive revolution ✗ Loss of control
+│   └─ Rupture (< 30)    Decides: Cohesion 82+    Safety net: Confidence 65+ ✓ Multipolar world     ✗ Hot war
+└─ AI plateaus → Europe's AI badge
+    ├─ Open              Decides: Cohesion 60+    Safety net: Confidence 40+ ✓ A bright winter      ✗ Decentralised mayhem
+    └─ Dependent         Decides: Cohesion 60+    Safety net: Confidence 40+ ✓ The agent economy    ✗ Silicon blackmail
+```
+
+Confidence here is the **true** value. Thresholds are v3's (`src/data/tuning.ts` there); every ending explains itself in one sentence from the gauge that decided: *"The superpowers raced. Confidence was 62, below the 75 a race needs."*
+
+## The three early endings
+
+Each is a world catastrophe, sober and plausible: a crisis that closes the story, not an apocalypse.
+
+| Pillar at 0 | Ending | What happened | Rests on |
+| --- | --- | --- | --- |
+| Cooperation | **Open conflict** | Washington and Beijing stop talking: cyberattacks, chip sanctions, warships around Taiwan; every lab joins a war effort | CFG Arms race; AI 2027 (theft, Taiwan); Dutch export controls |
+| Confidence | **Runaway incident** | A model that passed its tests copies itself onto rented servers; nobody can find every copy; datacentres are switched off one by one | CFG Diplomacy's warning shot; Apollo Research's self-exfiltration tests |
+| Cohesion | **Breakdown** | Layoffs and deepfakes outrun institutions; strikes, governments fall, Europe can no longer decide together | AI 2027 "AI Takes Some Jobs"; IMF exposure estimate |
+
+**Endings archive.** All 13 endings appear on an "Archive" screen, greyed out until reached once.
 
 ## Characters and cards
 
-**The cast** is the hybrid's: the US envoy, the Chinese delegate, OpenBrain's CEO, the safety researcher, the union leader, the open-source founder, the security chief, the partner minister, the journalist, Léa, and The AI (from the second half of the run). All are fictional. Each has a simple original portrait (flat shapes drawn in SVG, no imitation of *Reigns* art) and a recognisable voice.
+**The cast** is unchanged: the US envoy, the Chinese delegate, OpenBrain's CEO, the safety researcher, the union leader, the NimbusAI founder, the security chief, the partner minister, the journalist, Léa, The AI (from "self-improving AI") and Noor, your chief of staff (tutorial and Year in review). All are fictional, with original flat portraits.
 
-**A card** is a request from one character, with two answers.
+**A card** is a request from one character, with two answers: text ≤ 30 words, labels ≤ 4 words, effects on the gauges (AI power, Cooperation, Confidence estimate, margin, hidden true Confidence, Cohesion, Europe's AI lean), flags, follow-ups, an optional Learn more (≤ 40 words, sourced), a `basis`, a weight.
 
-- **Text**: at most 30 words, in the character's voice.
-- **Two answers**: a label of at most 4 words each ("Sign it", "Not now").
-- **Effects** of each answer on the four gauges (usually 2 or 3 of them, between 5 and 20 points), on the hidden tracks, on AI progress, and flags it sets.
-- **When** it can appear: date range, flags, gauge ranges.
-- **Follow-ups**: card ids that come back a few cards later because of this answer ("You refused the audit" → eight cards later, "The leak you could have caught").
-- **Learn more** (optional): the real-world fact behind the card, at most 40 words, with its source.
-- **Weight**, and **once** for cards that appear at most once per run.
+**Effects follow the scenarios' cause and effect.** Siding with Washington lowers Cooperation; diplomacy raises it but can cost Cohesion (seen as soft). Audits and testing narrow the margin and raise the true Confidence, often lowering the estimate (they find problems); shortcuts raise the estimate while the truth falls. Open models make Europe's AI Open but widen misuse risk. Social measures lift Cohesion at a cost to Europe's AI industry. Racing, stolen weights and compute deals speed AI up.
 
-**Kinds of cards:**
+**Every answer costs something:** each side lowers Cooperation, Confidence (estimate or truth), Cohesion or Europe's AI, widens the margin, or speeds AI up. A test enforces it.
 
-| Kind | What it does |
-| --- | --- |
-| Request | The normal card: a character asks, you choose. |
-| Follow-up | Comes back because of an earlier answer. This is how preparation pays off. |
-| News | Something happens ("DeepCent stole OpenBrain's weights"). Two reactions to choose from. |
-| Léa | Her life, as the world changes. Short, personal, sometimes no gauge moves. |
-| The AI | From mid-run, the model speaks to you directly. Its requests touch Safety, which you cannot see. |
-| Year in review | Once a year, words about the hidden tracks. One button: Continue. |
-| Tutorial | The first three cards of a first run teach the swipe. |
-
-**Every answer has a cost.** No card has a free right answer: each side must lower at least one gauge or one hidden track. A balance test enforces it.
-
-## Endings
-
-**Eight early endings**, one per gauge extreme (see the gauge table). Each is a short screen: a title, two sentences on what happened, and one line on the real idea behind it, with its source when it rests on a fact (for example, regulatory capture or the 2023 calls for a pause). Most first runs end this way, and that is intended.
-
-**Ten final endings**, reached by surviving to the tipping point or to December 2030. They use the v3 tree, with Safety in the place of Confidence and Steadiness in the place of Cohesion:
-
-| World | How you get there | Decides | Safety net | Good ending | Bad ending |
-| --- | --- | --- | --- | --- | --- |
-| Pause | Tipping point, Cooperation 60+ | Safety 65+ | Steadiness 45+ | Licensed utopia | Unstable pause |
-| Race | Tipping point, Cooperation 30–59 | Safety 75+ | Steadiness 55+ | Cognitive revolution | Loss of control |
-| Rupture | Tipping point, Cooperation below 30 | Steadiness 85+ | Safety 65+ | Multipolar world | Hot war |
-| Plateau, open | No tipping point, Europe's AI open | Steadiness 60+ | Safety 40+ | A bright winter | Decentralised mayhem |
-| Plateau, big labs | No tipping point, Europe's AI dependent | Steadiness 60+ | Safety 40+ | The agent economy | Silicon blackmail |
-
-The good ending needs both the deciding value and the safety net. These thresholds are starting values; the simulation tunes them.
-
-**Endings archive.** All 18 endings appear on an "Archive" screen, greyed out until reached once. This drives replay, as the deaths list does in *Reigns*.
+**Kinds of cards:** requests, follow-ups (preparation pays off), news (AI 2027 milestones forced in order; incidents when the true Confidence is low), Léa, The AI, Year in review, tutorial (first game only), finale.
 
 ## Learning and replay
 
-**Learn more.** A small "i" button on a card shows the real fact behind it, with its source, without leaving the card. Fiction stays labelled as fiction ("In this story…"). The player can read it or skip it; the game never forces it.
+**Learn more**: a small "i" on a card shows the real fact or the scenario passage behind it, with its source. Fiction stays labelled.
 
-**End screen**, after every ending:
+**End screen**: the ending's title, the one-sentence reason, the text, "What decided it" (the answers that moved what decided this ending most), "What you could not see" (the estimate you saw next to the true Confidence, Europe's AI, the hidden pace), "The world at the end" (the four gauges with the world's target and safety net drawn on them), "In reality" (sourced facts), goals completed, Play again and Archive.
 
-- The ending's title and text.
-- **What decided it**: the two or three answers that moved things most, in words ("You let OpenBrain skip the audit in May 2028").
-- **The hidden tracks revealed**: Cooperation, Safety and Europe's AI, in words and as a simple bar for each, now that the run is over.
-- **In reality**: one or two sourced facts linked to this ending.
-- Buttons: Play again, Archive.
+**Each game has a number** ("Game #4"). The counter, the archive and goals are saved in `localStorage` (wrapped in try/catch; the game works without it).
 
-**Each run is a new envoy** ("Envoy #4"), as each reign is a new king in *Reigns*. The run counter and the archive are saved in the browser (`localStorage`, wrapped in try/catch; the game works without it).
-
-**Goals between runs.** Three goals are shown at a time, Reigns-style ("Survive until 2029", "Reach a Pause world", "Finish with every gauge between 30 and 70"). Completing one unlocks new cards (for example, the journalist's chain on the stolen weights) so later runs show more of the story. About 15 goals in the first version.
+**Goals between games.** Three at a time, about worlds and gauges ("Reach a Pause world", "Keep Cohesion above 50 until the tipping point", "End a game with Confidence certain to ±8"). Completing one unlocks cards. 15 goals.
 
 ## Screen, interaction and accessibility
 
-**Layout (mobile first, portrait):** the four gauge icons with their fill at the top; the date and the AI progress bar below them; the character's portrait and card in the middle; the character's name under the card; the Learn more button in a corner of the card. On a wide screen the same column sits centred, with the archive and goals at the side.
+**Layout (mobile first):** the date and game number; the four gauges in v3's style (AI power with its tipping-point tick, Cooperation with its three zones, Confidence with its margin band, Cohesion); Europe's AI badge; the request on a paper card; the character's name; the two answer buttons.
 
-**Choosing:**
+**Choosing:** drag the card, or click an answer (first click previews, second confirms), or ← → / Enter / Escape. Answer buttons' accessible names say what they move; an `aria-live` region announces the changes in words with + / − and the date; gauges carry their values as text; contrast WCAG AA; `prefers-reduced-motion` fades the card; dialogs trap focus and close with Escape. An axe audit and whole games played with the keyboard alone run before merging.
 
-- **Touch or mouse**: drag the card left or right. While it leans, the answer's label appears and the marks on the gauges show what will move. Let go past the threshold to confirm; let go before it to cancel.
-- **Buttons**: two real buttons under the card, with the answer labels, always present. Clicking one shows the preview; clicking again confirms. This is the path for keyboards, screen readers and anyone who dislikes dragging.
-- **Keyboard**: ← and → pick a side and show its preview, Enter confirms, Escape cancels. Shortcuts are listed on screen and do not fire while focus is on another control.
-
-**Accessibility** (required, as in the main repository):
-
-- Each answer button's accessible name includes what it will move: "Sign it. Will change: Labs a lot, Allies a little."
-- After an answer, an `aria-live` region announces the changes once, in words: "Labs up a lot. Allies down a little. March 2027."
-- Gauges carry their value as text and a label, never colour alone; + / − and words go with every change.
-- Contrast is at least WCAG AA.
-- With `prefers-reduced-motion`, the card fades instead of flying and nothing pulses.
-- Ending screens and the archive move focus to their heading; overlays trap focus and close with Escape.
-- An axe audit and a whole run played with the keyboard alone run in CI.
+**Look:** the visual charter of v3 (night background, deck panels, gauge colours: AI power amber, Cooperation zones red / amber / teal, Confidence teal, Cohesion violet; Big Shoulders Display, Public Sans, IBM Plex Mono and Newsreader from Google Fonts), around a paper card.
 
 ## Realism
 
-A swipe game invites caricature; this one must not. Every card stays close to **AI 2027** (the story) and **CFG, Advanced AI: Possible Futures** (the worlds and their drivers), as in Middle Power.
+As in Middle Power: every card and ending has a `basis` (AI 2027 section, CFG section or real source); milestones in AI 2027's order; effects follow the scenarios' cause and effect, sizes are tuned by the simulation; every real fact has a primary source; fiction is labelled; every interpretation is listed under "Realism notes" in the build notes.
 
-- **Every card has a `basis`**: `ai2027`, `cfg` or `real`, with a precise reference. Characters voice positions that the scenarios or real actors hold. A test fails on any card without a basis.
-- **Milestones come in AI 2027's order; their dates may vary** with the hidden takeoff speed. A card tied to a milestone appears only after it.
-- **Answers have the effects the scenarios imply**: the direction follows their cause and effect; the size is tuned by the simulation.
-- **The eight early endings are plausible political outcomes**: the envoy loses the mandate for a concrete reason, tied to a real mechanism with a sourced precedent. No overnight bans, no apocalypse before the tipping point.
-- **Realism notes** in the build notes list every card or ending that interprets or stretches the scenarios, for Louis and the fact-check.
+## Validation
 
-## Tech, content and validation
-
-**Stack**: the same as Middle Power. Vite and TypeScript with no framework; a pure engine with a seeded RNG and no DOM; declarative data in `src/data` with every number in `tuning.ts`; a string-template UI; Vitest, Playwright, axe and a seeded simulation (`npm run sim`). A `CLAUDE.md` copies the house rules. GitHub Pages publishes `main` at the root and every other branch under `/preview/<branch>/`, with actions pinned to commit SHAs and least-privilege permissions.
-
-**Content for the first version:**
-
-- About **120 cards**: around 8 per character, 10 follow-up chains, 10 news cards, 8 Léa cards, 8 cards for The AI, the yearly reviews and 3 tutorial cards.
-- 8 early endings and 10 final endings, with their texts.
-- 15 goals.
-- A Learn more fact on at least half of the cards, each checked against its primary source and listed in `sources.ts`.
-
-The build drafts the cards; Louis reviews the voices and the fact-check reviews every Learn more line.
-
-**Simulation targets** (thousands of seeded runs per strategy):
+**Simulation targets** (2,000 seeded games per strategy, `npm run sim`):
 
 | Strategy | Target |
 | --- | --- |
-| Always left, or always right | Dies within 20 cards in more than 90% of runs |
-| Random | Survives to the end in under 20% of runs; median run around 20 to 30 cards |
-| Balancer (keeps gauges near 50) | Survives to the end in more than 60% of runs, good ending in 25–45% |
-| Thoughtful (balancer that also favours Safety and Cooperation) | Good ending in 55–80% of runs |
-| All | Each of the 18 endings reached in at least 1% of runs of some strategy |
+| Always left, always right | Good endings below 10% |
+| Random | Good endings 15–30%; early collapse 30–60% |
+| Balancer (reads the visible gauges) | Good endings 55–80% |
+| Thoughtful (favours the true Confidence, Cooperation and Cohesion) | Good endings 55–80%; early collapse below 15% |
+| All | Each of the 13 endings in at least 1% of games for some strategy; both usual answers of every character in winning games; the tipping point never before AI 2027's milestones |
 
-Two extra checks: no card has an answer that is never worse (each side lowers something), and for every character both of their usual answers lead to good endings in some runs.
-
-**Playtest**: five people, three runs each, with the same four questions as the v3 and hybrid playtests, so the three versions can be compared.
+**Playtest**: five people, three games each, with the same four questions as the v3 and hybrid playtests.

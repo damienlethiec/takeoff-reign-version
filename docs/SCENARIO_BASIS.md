@@ -75,9 +75,12 @@ Two drivers (CFG's "critical uncertainties"): **speed** (AI-automated research d
 
 ## 3. How the game maps onto them
 
-- **Cooperation** (hidden) is CFG's US–China axis that separates Diplomacy, Take-off and Arms race; it falls with theft and export controls and rises with verification and summits (AI 2027: theft, August 2027 controls, failed arms talks; CFG Arms race drivers).
-- **Safety** (hidden) is "how aligned the leading AI truly is": it falls with racing and skipped evaluations and rises with interpretability, faithful chain of thought and independent audits (AI 2027 Slowdown; CFG Take-off and Diplomacy drivers).
-- **Europe's AI** (hidden, Open or Dependent) is CFG's concentration axis seen from Europe (Plateau and Big AI endings).
-- **AI progress** is AI 2027's R&D multiplier, rising faster with racing and theft and slower with pauses and inspections.
-- **The tipping point** is AI 2027's branch point (October 2027 in the scenario); the three final requests are its three pressures: Washington's race-or-slow choice, Beijing's treaty offer, and the AI's own request for autonomy.
+The gauges are those of *Middle Power* v3 (since the 26 October 2026 rework).
+
+- **Cooperation** (visible, zones Pause / Race / Rupture) is CFG's US–China axis that separates Diplomacy, Take-off and Arms race; it falls with theft and export controls and rises with verification and summits (AI 2027: theft, August 2027 controls, failed arms talks; CFG Arms race drivers). At 0: open conflict.
+- **Confidence** (an estimate ± margin, visible; the true value hidden) is "how far we can trust the AI systems". The truth falls with racing and skipped evaluations and rises with interpretability, faithful chain of thought and independent audits (AI 2027 Slowdown; CFG Take-off and Diplomacy drivers). The labs' reports push the estimate up; oversight narrows the margin. At 0: a runaway incident (CFG Diplomacy's warning shot, uncontained).
+- **Cohesion** (visible) is whether European society holds: AI 2027's job turmoil and protests, CFG's misuse and concentration. At 0: breakdown.
+- **Europe's AI** (badge Open or Dependent) is CFG's concentration axis seen from Europe (Plateau and Big AI endings).
+- **AI power** is AI 2027's R&D multiplier, rising faster with racing and theft and slower with pauses and inspections. AI 2027's milestones fire in order as it rises.
+- **The tipping point** (AI power 80) is AI 2027's branch point (October 2027 in the scenario); the three final requests are its three pressures: Washington's race-or-slow choice, Beijing's treaty offer, and the AI's own request for autonomy.
 - **No tipping point by December 2030** is CFG's Plateau or Big AI.

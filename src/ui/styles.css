@@ -151,6 +151,7 @@ kbd {
 }
 .title-card {
   width: 100%;
+  min-width: 0;
   max-width: 560px;
   display: grid;
   gap: 20px;
@@ -169,7 +170,7 @@ kbd {
   color: var(--cap);
 }
 .t-main {
-  font-size: clamp(4rem, 21vw, 7rem);
+  font-size: clamp(3.4rem, 16vw, 7rem);
 }
 .t-sub {
   font-family: var(--f-display);
@@ -327,8 +328,8 @@ kbd {
   margin: 8px 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 6px;
 }
 .gauge {
   position: relative;
@@ -363,9 +364,17 @@ kbd {
   color: var(--cap);
 }
 .g-delta {
+  position: absolute;
+  top: -9px;
+  right: 8px;
   font-family: var(--f-data);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  line-height: 1.3;
   white-space: nowrap;
+  background: var(--night);
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 0 5px;
 }
 .g-delta:empty {
   display: none;
@@ -1174,10 +1183,12 @@ kbd {
     min-height: 0;
   }
 }
-@media (max-width: 360px) {
+@media (max-width: 440px) {
   .topline .logo {
     display: none;
   }
+}
+@media (max-width: 360px) {
   .g-val {
     font-size: 1.25rem;
   }

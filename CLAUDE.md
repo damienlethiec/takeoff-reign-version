@@ -1,6 +1,6 @@
 # Takeoff: Reign Version — notes for coding agents
 
-A short, replayable Reigns-style swipe game about AI governance. The player is the EU's AI Envoy: one request at a time, left or right; four gauges die at 0 or 100; hidden tracks decide one of ten final endings at AI's tipping point or in December 2030. All game text is in English; the team discusses in French. Sister project (same team, same stack): `damienlethiec/takeoff-middle-power`.
+A short, replayable Reigns-style swipe game about AI governance. The player is the EU's AI Envoy: one request at a time, left or right. The gauges are the world's, the same as Middle Power v3: AI power (the clock, tipping point at 80), Cooperation (Pause / Race / Rupture zones), Confidence (an estimate ± margin hiding a true value), Cohesion, and the Europe's AI badge. Cooperation, Confidence or Cohesion at 0 ends the game early (a world catastrophe, 3 endings); otherwise the v3 tree picks one of ten final endings at the tipping point or in December 2030. All game text is in English; the team discusses in French. Sister project (same team, same stack): `damienlethiec/takeoff-middle-power`.
 
 ## Read first
 
@@ -33,11 +33,12 @@ npm run shots     # screenshots of every screen at 390×844 and 1280×800 into d
 
 ## Rules of the house
 
-- **Balance changes go through the simulation.** Run `npm run sim` before and after; record the change, the old value and the reason in the "Tuning changes" table of `docs/DEVELOPER_NOTES.md`. Targets: always-left / always-right die within 20 cards in > 90%; random survives < 20% with a median run of 20–30 cards; balancer survives > 60% with 25–45% good endings; thoughtful 55–80% good; every one of the 18 endings ≥ 1% for some strategy; both answers of every character appear in winning runs.
+- **Balance changes go through the simulation.** Run `npm run sim` before and after; record the change, the old value and the reason in the "Tuning changes" table of `docs/DEVELOPER_NOTES.md`. Targets: always-left / always-right < 10% good endings; random 15–30% good and 30–60% early collapses; balancer and thoughtful 55–80% good; thoughtful < 15% early collapses; every one of the 13 endings ≥ 1% for some strategy; both answers of every character appear in winning games; the tipping point never before AI 2027's milestones.
 - **Refactors must not change behaviour**: the seeded `npm run sim` output must stay byte-identical.
-- **Every answer costs something**: each side of a two-answer card lowers at least one gauge or hidden track. Right goes along with the request, left refuses (see the conventions in the developer notes).
+- **Same model as v3**: gauge names, start values, zones and ending thresholds match `takeoff-middle-power` v3's `tuning.ts`. Do not reintroduce envoy-career gauges; endings, goals and the archive talk about the world.
+- **Every answer costs something**: each side of a two-answer card lowers Cooperation, Confidence (estimate or truth), Cohesion or Europe's AI, widens the margin, or speeds AI up. Right goes along with the request, left refuses (see the conventions in the developer notes).
 - **Text limits**: card text ≤ 30 words, answer labels ≤ 4 words, Learn more ≤ 40 words, plain English. Tests enforce them.
-- **Hidden tracks** (Cooperation, Safety, Europe's AI, Steadiness, takeoff speed) never appear as numbers before the end: not in previews, announcements or texts. Year in review and characters hint in words only.
+- **Hidden values** (the true Confidence, the lean behind Europe's AI badge, the takeoff speed) never appear as numbers before the end: not in previews, announcements or texts. The Confidence gauge shows only the estimate ± margin. Year in review and characters hint in words only.
 
 ## Realism (top priority for content)
 
@@ -45,9 +46,9 @@ npm run shots     # screenshots of every screen at 390×844 and 1280×800 into d
 - **Milestones come in AI 2027's order** (`src/data/milestones.ts`); their dates vary with the hidden takeoff speed. A card tied to a milestone uses `when.after` and appears only after it.
 - **Effect directions follow the scenarios' cause and effect**; magnitudes are tuned by the simulation.
 - **Every real-world fact shown has a primary source** in `sources.ts`, checked by reading it; if it cannot be verified, drop it. Fiction (OpenBrain, DeepCent, NimbusAI, every event after 2026) is always labelled: story news starts "In this story", scenario Learn more lines start "In AI 2027" or "In the CFG scenarios".
-- **Early endings are plausible political outcomes** with a real mechanism and a sourced precedent. No overnight bans, no apocalypse before the tipping point.
+- **Early endings are world catastrophes told soberly** (open conflict, a runaway AI incident, society breaking down), each with a basis and a sourced precedent. No apocalypse before the tipping point: a crisis that closes the story.
 - List every interpretation or stretch under "Realism notes" in `docs/BUILD_NOTES.md`, for Louis and the fact-check.
-- Fonts stay on Google Fonts; the production CSP allows `fonts.googleapis.com` and `fonts.gstatic.com` only.
+- Fonts stay on Google Fonts (v3's: Big Shoulders Display, Public Sans, IBM Plex Mono, Newsreader); the production CSP allows `fonts.googleapis.com` and `fonts.gstatic.com` only. The look follows v3's visual charter (colour tokens and gauge styling in `src/ui/styles.css`).
 
 ## Security
 
@@ -56,7 +57,7 @@ Content is static, but treat every string reaching `innerHTML` as untrusted: esc
 ## Accessibility (required for every UI change)
 
 - Two real answer buttons are always present: the first click previews (marks on the gauges, `aria-pressed`, an announcement), a second click confirms. Dragging the card is never the only way.
-- Each answer's accessible name says what it moves: "Sign it. Will change: Labs a lot, Allies a little."
+- Each answer's accessible name says what it moves: "Sign it. Will change: Cooperation a lot, Cohesion a little."
 - Keys: ← → pick a side and preview, Enter confirms, Escape cancels. They never fire while focus is on another control, and they are listed on screen.
 - After an answer, the `aria-live` region announces the changes once, in words with + / −, and the date; focus moves to the new card.
 - Gauges carry their value as text; never colour alone. Contrast at least WCAG AA.
