@@ -4,17 +4,17 @@ import { completedGoals, activeGoals, GOALS } from '../src/data/goals';
 import { MILESTONE_ORDER } from '../src/data/milestones';
 import { TUNING } from '../src/data/tuning';
 import { answer, answerOf, cardOf, eligible, marks, newGame, readLearn, result, view } from '../src/engine';
-import { dateLabel, finalEnding, steadiness, worldOf } from '../src/engine/rules';
+import { dateLabel, finalEnding, settleConfidence, worldOf } from '../src/engine/rules';
 import type { Side } from '../src/engine/types';
 import { balancer, playRun, randomStrategy, thoughtful } from '../scripts/strategies';
 
 
 describe('newGame', () => {
-  it('starts at 50 on every gauge, January 2027, and is reproducible from its seed', () => {
+  it('starts with v3’s values, January 2027, and is reproducible from its seed', () => {
     const a = newGame({ seed: 42 });
     const b = newGame({ seed: 42 });
     expect(a).toEqual(b);
-    expect(a.gauges).toEqual({ labs: 50, citizens: 50, allies: 50, oversight: 50 });
+    expect(a.w).toEqual({ aiPower: 18, cooperation: 52, confidence: 55, margin: 15, truth: 52, cohesion: 66, europe: 42 });
     expect(dateLabel(a.month)).toBe('January 2027');
     expect(a.takeoff).toBeGreaterThan(0);
   });
@@ -40,32 +40,44 @@ describe('answer', () => {
     expect(s).toEqual(copy);
   });
 
-  it('applies the answer, moves time three weeks and records it', () => {
+  it('applies the answer, moves time three weeks, AI power rises, and records it', () => {
     const s = newGame({ seed: 11 });
     const card = cardOf(s);
     const a = answerOf(card, 'right');
     const t = answer(s, 'right');
-    for (const g of ['labs', 'citizens', 'allies', 'oversight'] as const) expect(t.gauges[g]).toBe(Math.max(0, Math.min(100, 50 + (a.effects[g] ?? 0))));
+    expect(t.w.cohesion).toBeCloseTo(66 + (a.effects.cohesion ?? 0), 0);
     expect(t.turn).toBe(1);
     expect(t.month).toBe(TUNING.time.monthsPerCard);
     expect(t.history[0]).toMatchObject({ cardId: card.id, side: 'right', label: a.label });
-    expect(t.progress).toBeGreaterThan(0);
+    expect(t.w.aiPower).toBeGreaterThan(18 + (a.effects.aiPower ?? 0));
   });
 
-  it('a gauge at 0 or 100 ends the run with that gauge’s early ending', () => {
-    let s = newGame({ seed: 5 });
-    s = { ...s, gauges: { ...s.gauges, labs: 1 } };
-    // find a card whose some side lowers labs
-    let guard = 0;
-    while (s.phase !== 'over' && guard++ < 200) {
-      const c = cardOf(s);
-      const side: Side = (answerOf(c, 'left').effects.labs ?? 0) < 0 ? 'left' : c.right && (answerOf(c, 'right').effects.labs ?? 0) < 0 ? 'right' : 'left';
-      s = answer(s, side);
-      if (s.phase !== 'over') s = { ...s, gauges: { ...s.gauges, labs: Math.min(s.gauges.labs, 1), citizens: 50, allies: 50, oversight: 50 } };
+  it('the true Confidence always stays inside the estimate ± margin', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      let s = newGame({ seed });
+      while (s.phase !== 'over') {
+        s = answer(s, randomStrategy.choose(s, () => (seed % 3) / 3));
+        expect(Math.abs(s.w.confidence - s.w.truth)).toBeLessThanOrEqual(s.w.margin + 1e-9);
+      }
     }
-    expect(s.phase).toBe('over');
-    expect(s.ending).toBe('exodus');
-    expect(result(s).early).toBe(true);
+    const w = { aiPower: 0, cooperation: 50, confidence: 80, margin: 10, truth: 50, cohesion: 50, europe: 0 };
+    settleConfidence(w);
+    expect(w.confidence).toBe(60);
+  });
+
+  it('a pillar at 0 ends the game early with that pillar’s catastrophe; nothing ends at 100', () => {
+    for (const [g, id] of [['cooperation', 'open_conflict'], ['cohesion', 'breakdown']] as const) {
+      let s = newGame({ seed: 5 });
+      let guard = 0;
+      while (s.phase !== 'over' && guard++ < 200) {
+        const c = cardOf(s);
+        const side: Side = (answerOf(c, 'left').effects[g] ?? 0) < 0 ? 'left' : c.right && (answerOf(c, 'right').effects[g] ?? 0) < 0 ? 'right' : 'left';
+        s = answer(s, side);
+        if (s.phase !== 'over') s = { ...s, w: { ...s.w, [g]: Math.min(s.w[g], 1), cooperation: g === 'cooperation' ? Math.min(s.w.cooperation, 1) : 100, cohesion: g === 'cohesion' ? Math.min(s.w.cohesion, 1) : 100 } };
+      }
+      expect(s.ending).toBe(id);
+      expect(result(s).early).toBe(true);
+    }
   });
 
   it('fires milestones in AI 2027’s order, each announced by its news card', () => {
@@ -151,32 +163,27 @@ describe('answer', () => {
 });
 
 describe('preview and view', () => {
-  it('marks say which gauges move and roughly how much, never the direction', () => {
-    const m = marks({ label: 'x', effects: { labs: 12, citizens: -4, safety: -20 } });
+  it('marks say which visible gauges move and roughly how much, never the direction nor the hidden truth', () => {
+    const m = marks({ label: 'x', effects: { cooperation: 12, margin: -4, truth: -20, europe: 9 } });
     expect(m).toEqual([
-      { gauge: 'labs', size: 'large' },
-      { gauge: 'citizens', size: 'small' },
+      { gauge: 'cooperation', size: 'large' },
+      { gauge: 'confidence', size: 'small' },
     ]);
     expect(JSON.stringify(m)).not.toMatch(/-|\d/);
+    expect(marks({ label: 'x', effects: { truth: 8 } })).toEqual([]);
   });
 
   it('the view never exposes hidden effects', () => {
     const v = view(newGame({ seed: 9 }));
-    expect(JSON.stringify([v.left, v.right])).not.toMatch(/safety|coop|europe|progress/);
+    expect(JSON.stringify([v.left, v.right])).not.toMatch(/truth|europe|effects/);
     expect(Object.keys(v.left)).toEqual(['label', 'marks']);
   });
 });
 
 describe('rules', () => {
-  it('steadiness is 100 at the centre and falls toward the edges', () => {
-    expect(steadiness({ labs: 50, citizens: 50, allies: 50, oversight: 50 })).toBe(100);
-    expect(steadiness({ labs: 0, citizens: 100, allies: 0, oversight: 100 })).toBe(0);
-    expect(steadiness({ labs: 60, citizens: 40, allies: 50, oversight: 50 })).toBe(90);
-  });
-
-  it('the world comes from Cooperation at the tipping point, or Europe’s AI on a plateau', () => {
+  it('the world comes from the Cooperation zone at the tipping point, or Europe’s AI on a plateau', () => {
     const base = newGame({ seed: 1 });
-    const at = (coop: number, europe: number, tipped?: number) => worldOf({ hidden: { ...base.hidden, coop, europe }, tippedAt: tipped });
+    const at = (cooperation: number, europe: number, tipped?: number) => worldOf({ w: { ...base.w, cooperation, europe }, tippedAt: tipped });
     expect(at(70, 0, 30)).toBe('pause');
     expect(at(45, 0, 30)).toBe('race');
     expect(at(10, 0, 30)).toBe('rupture');
@@ -184,14 +191,16 @@ describe('rules', () => {
     expect(at(90, 10)).toBe('plateau_dependent');
   });
 
-  it('the good ending needs both the deciding value and the safety net', () => {
-    const base = newGame({ seed: 1 });
-    const g = { labs: 50, citizens: 50, allies: 50, oversight: 50 };
-    const E = TUNING.endings;
-    expect(finalEnding({ hidden: { coop: 80, safety: E.pause.safety, europe: 0 }, tippedAt: 20, gauges: g }).id).toBe('licensed_utopia');
-    expect(finalEnding({ hidden: { coop: 80, safety: E.pause.safety - 1, europe: 0 }, tippedAt: 20, gauges: g }).id).toBe('unstable_pause');
-    expect(finalEnding({ hidden: { coop: 80, safety: 99, europe: 0 }, tippedAt: 20, gauges: { ...g, labs: 95, citizens: 5 } }).id).toBe('unstable_pause');
-    void base;
+  it('the good ending needs the deciding gauge (true Confidence, not the estimate) and the safety net', () => {
+    const base = newGame({ seed: 1 }).w;
+    const P = TUNING.worlds.pause;
+    const at = (truth: number, cohesion: number, confidence = truth) => finalEnding({ w: { ...base, cooperation: 80, truth, confidence, cohesion }, tippedAt: 20 }).id;
+    expect(at(P.target, P.floor)).toBe('licensed_utopia');
+    expect(at(P.target - 1, 90, 90)).toBe('unstable_pause');
+    expect(at(99, P.floor - 1)).toBe('unstable_pause');
+    const R = TUNING.worlds.rupture;
+    expect(finalEnding({ w: { ...base, cooperation: 10, truth: R.floor, cohesion: R.target }, tippedAt: 20 }).id).toBe('multipolar_world');
+    expect(finalEnding({ w: { ...base, cooperation: 10, truth: 99, cohesion: R.target - 1 }, tippedAt: 20 }).id).toBe('hot_war');
   });
 });
 
@@ -208,7 +217,7 @@ describe('result and goals', () => {
     const r = playRun(balancer, 4);
     const s = readLearn(readLearn(readLearn(r.final)));
     const done = completedGoals(s, r.result, { runs: 1, endings: [r.result.id] }, []);
-    expect(done).toContain('survive_2028');
+    expect(done).toContain('reach_2028');
     expect(done).toContain('learn3');
     expect(activeGoals([])).toHaveLength(3);
     expect(activeGoals(GOALS.map((g) => g.id))).toHaveLength(0);

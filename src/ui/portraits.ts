@@ -1,7 +1,7 @@
 // Original flat portraits, drawn from simple shapes (circles, rounded rectangles, a few paths).
 // Decorative: the character's name and role are always written next to them.
 
-import type { CharacterId, GaugeId } from '../engine/types';
+import type { CharacterId } from '../engine/types';
 
 interface Person {
   bg: string;
@@ -148,13 +148,3 @@ export function portrait(who: CharacterId): string {
   const inner = who === 'ai' ? AI : who === 'news' ? NEWS : person(PEOPLE[who]!);
   return `<svg class="portrait" viewBox="0 0 120 120" aria-hidden="true" focusable="false">${inner}</svg>`;
 }
-
-// Gauge icons: simple strokes in a 32×32 box.
-const ICONS: Record<GaugeId, string> = {
-  labs: '<rect x="8" y="8" width="16" height="16" rx="2"/><path d="M12 4v4M16 4v4M20 4v4M12 24v4M16 24v4M20 24v4M4 12h4M4 16h4M4 20h4M24 12h4M24 16h4M24 20h4"/>',
-  citizens: '<circle cx="11" cy="11" r="4"/><circle cx="22" cy="11" r="4"/><path d="M3 27c0-5 4-8 8-8s8 3 8 8M14 27c0-5 4-8 8-8s7 3 7 8"/>',
-  allies: '<circle cx="16" cy="16" r="12"/><path d="M4 16h24M16 4c4 4 5 8 5 12s-1 8-5 12c-4-4-5-8-5-12s1-8 5-12z"/>',
-  oversight: '<path d="M3 16c4-7 8-10 13-10s9 3 13 10c-4 7-8 10-13 10S7 23 3 16z"/><circle cx="16" cy="16" r="5"/>',
-};
-export const gaugeIcon = (g: GaugeId): string =>
-  `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONS[g]}</svg>`;

@@ -1,40 +1,37 @@
-// Pure rules shared by the engine and the data (text functions read them): steadiness, worlds, endings.
+// Pure rules shared by the engine and the data (text functions read them): zones, worlds, endings, dates.
 
 import { TUNING } from '../data/tuning';
-import type { EarlyEndingId, FinalEndingId, GameState, GaugeId, World } from './types';
-import { GAUGES } from './types';
+import type { EarlyEndingId, FinalEndingId, GameState, GaugeId, World, WorldState } from './types';
+import { PILLARS } from './types';
 
-const E = TUNING.endings;
+const clamp = (v: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 
-/** 100 when every gauge sits at 50, 0 when every gauge sits at 0 or 100. */
-export function steadiness(gauges: Record<GaugeId, number>): number {
-  const dev = GAUGES.reduce((a, g) => a + Math.abs(gauges[g] - 50), 0) / GAUGES.length;
-  return Math.round(100 - 2 * dev);
+export const isEuropeOpen = (s: Pick<GameState, 'w'>): boolean => s.w.europe >= TUNING.europe.openAt;
+
+/** Keeps Confidence consistent: margin within bounds, the truth always inside estimate ± margin. Mutates `w`. */
+export function settleConfidence(w: WorldState): void {
+  w.margin = clamp(Math.round(w.margin * 10) / 10, TUNING.confidence.minMargin, TUNING.confidence.maxMargin);
+  w.truth = clamp(w.truth);
+  w.confidence = clamp(clamp(w.confidence, w.truth - w.margin, w.truth + w.margin));
 }
 
-export const isEuropeOpen = (s: Pick<GameState, 'hidden'>): boolean => s.hidden.europe >= E.openAt;
+export type Zone = 'pause' | 'race' | 'rupture';
+export const zoneOf = (cooperation: number): Zone => (cooperation >= TUNING.zones.pause ? 'pause' : cooperation >= TUNING.zones.race ? 'race' : 'rupture');
 
-/** The gauge at an extreme, if any (checked in gauge order). */
-export function fatalGauge(gauges: Record<GaugeId, number>): { gauge: GaugeId; high: boolean } | undefined {
-  for (const g of GAUGES) {
-    if (gauges[g] <= 0) return { gauge: g, high: false };
-    if (gauges[g] >= 100) return { gauge: g, high: true };
-  }
-  return undefined;
+/** The pillar at 0, if any (checked in the order Cooperation, Confidence, Cohesion). */
+export function fatalGauge(w: WorldState): GaugeId | undefined {
+  return PILLARS.find((g) => w[g] <= 0);
 }
 
-export const EARLY_BY_GAUGE: Record<GaugeId, [EarlyEndingId, EarlyEndingId]> = {
-  labs: ['exodus', 'capture'],
-  citizens: ['apathy', 'patchwork'],
-  allies: ['isolated', 'absorbed'],
-  oversight: ['blindsided', 'overreach'],
+export const EARLY_BY_GAUGE: Partial<Record<GaugeId, EarlyEndingId>> = {
+  cooperation: 'open_conflict',
+  confidence: 'runaway_incident',
+  cohesion: 'breakdown',
 };
 
-export function worldOf(s: Pick<GameState, 'hidden' | 'tippedAt'>): World {
+export function worldOf(s: Pick<GameState, 'w' | 'tippedAt'>): World {
   if (s.tippedAt === undefined) return isEuropeOpen(s) ? 'plateau_open' : 'plateau_dependent';
-  if (s.hidden.coop >= E.pauseCoop) return 'pause';
-  if (s.hidden.coop >= E.raceCoop) return 'race';
-  return 'rupture';
+  return zoneOf(s.w.cooperation);
 }
 
 export const WORLD_ENDINGS: Record<World, { good: FinalEndingId; bad: FinalEndingId }> = {
@@ -45,31 +42,22 @@ export const WORLD_ENDINGS: Record<World, { good: FinalEndingId; bad: FinalEndin
   plateau_dependent: { good: 'agent_economy', bad: 'silicon_blackmail' },
 };
 
-/** The v3 tree: each world has a deciding value and a safety net; the good ending needs both. */
-export function finalEnding(s: Pick<GameState, 'hidden' | 'tippedAt' | 'gauges'>): { id: FinalEndingId; world: World; good: boolean } {
+/** The value a world reads for a gauge: Confidence is the true value, revealed at the end. */
+export const endValue = (w: WorldState, k: 'confidence' | 'cohesion'): number => Math.round(k === 'confidence' ? w.truth : w.cohesion);
+
+/** The v3 tree: each world has a deciding gauge and a safety net; the good ending needs both. */
+export function finalEnding(s: Pick<GameState, 'w' | 'tippedAt'>): { id: FinalEndingId; world: World; good: boolean; decidesMet: boolean; netMet: boolean } {
   const world = worldOf(s);
-  const safety = s.hidden.safety;
-  const st = steadiness(s.gauges);
-  let good: boolean;
-  switch (world) {
-    case 'pause':
-      good = safety >= E.pause.safety && st >= E.pause.steadiness;
-      break;
-    case 'race':
-      good = safety >= E.race.safety && st >= E.race.steadiness;
-      break;
-    case 'rupture':
-      good = st >= E.rupture.steadiness && safety >= E.rupture.safety;
-      break;
-    default:
-      good = st >= E.plateau.steadiness && safety >= E.plateau.safety;
-  }
-  return { id: good ? WORLD_ENDINGS[world].good : WORLD_ENDINGS[world].bad, world, good };
+  const r = TUNING.worlds[world];
+  const decidesMet = endValue(s.w, r.decides) >= r.target;
+  const netMet = endValue(s.w, r.net) >= r.floor;
+  const good = decidesMet && netMet;
+  return { id: good ? WORLD_ENDINGS[world].good : WORLD_ENDINGS[world].bad, world, good, decidesMet, netMet };
 }
 
 /** Takeoff speed band, in words, from the hidden multiplier. */
 export function takeoffBand(takeoff: number): 'slow' | 'steady' | 'fast' {
-  const t = TUNING.progress.takeoff;
+  const t = TUNING.aiPower.takeoff;
   if (takeoff < (t.slow.max + t.steady.min) / 2) return 'slow';
   if (takeoff < (t.steady.max + t.fast.min) / 2) return 'steady';
   return 'fast';

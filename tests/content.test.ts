@@ -8,7 +8,8 @@ import { MILESTONE_ORDER } from '../src/data/milestones';
 import { SOURCES } from '../src/data/sources';
 import { newGame } from '../src/engine';
 import type { Answer, Basis, CardDef } from '../src/engine/types';
-import { GAUGES, HIDDEN } from '../src/engine/types';
+import { EFFECT_KEYS, PILLARS } from '../src/engine/types';
+
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 const sample = newGame({ seed: 1 });
@@ -16,14 +17,21 @@ const textOf = (c: CardDef) => {
   if (typeof c.text === 'string') return [c.text];
   // dynamic texts: try a few states that cover their branches
   const variants = new Set<string>();
-  for (const safety of [10, 50, 70, 90])
-    for (const coop of [10, 40, 70])
-      for (const tipped of [undefined, 40])
-        variants.add(c.text({ ...sample, hidden: { ...sample.hidden, safety, coop }, tippedAt: tipped }));
+  for (const truth of [10, 50, 70, 90])
+    for (const cooperation of [10, 40, 70])
+      for (const confidence of [20, 60, 95])
+        for (const europe of [10, 45, 70])
+          for (const takeoff of [0.6, 1.1, 2])
+            for (const tipped of [undefined, 40])
+              variants.add(c.text({ ...sample, w: { ...sample.w, truth, cooperation, confidence, europe, margin: 30 }, takeoff, tippedAt: tipped }));
   return [...variants];
 };
 const answers = (c: CardDef): Answer[] => (c.right ? [c.left, c.right] : [c.left]);
-const lowersSomething = (a: Answer) => [...GAUGES, ...HIDDEN].some((k) => (a.effects[k] ?? 0) < 0);
+/** A cost: a pillar, the true Confidence or Europe's AI goes down, the margin widens, or AI speeds up. */
+const lowersSomething = (a: Answer) => {
+  const e = a.effects;
+  return (['cooperation', 'confidence', 'truth', 'cohesion', 'europe'] as const).some((k) => (e[k] ?? 0) < 0) || (e.margin ?? 0) > 0 || (e.aiPower ?? 0) > 0;
+};
 const validBasis = (b: Basis) =>
   b.kind === 'ai2027' ? (AI2027_REFS as readonly string[]).includes(b.ref) : b.kind === 'cfg' ? (CFG_REFS as readonly string[]).includes(b.ref) : b.ref in SOURCES;
 
@@ -54,18 +62,18 @@ describe('cards', () => {
     }
   });
 
-  it('gauge changes stay between 2 and 20 points; requests move 1 to 3 gauges', () => {
+  it('changes stay at most 15 points; requests move 1 to 4 things', () => {
     for (const c of CARDS)
       for (const a of answers(c))
-        for (const g of GAUGES) {
-          const v = Math.abs(a.effects[g] ?? 0);
-          if (v) expect(v, `${c.id} ${g}`).toBeLessThanOrEqual(20);
+        for (const k of EFFECT_KEYS) {
+          const v = Math.abs(a.effects[k] ?? 0);
+          if (v) expect(v, `${c.id} ${k}`).toBeLessThanOrEqual(15);
         }
     for (const c of CARDS.filter((x) => x.kind === 'request'))
       for (const a of answers(c)) {
-        const n = GAUGES.filter((g) => a.effects[g]).length;
+        const n = EFFECT_KEYS.filter((k) => a.effects[k]).length;
         expect(n, `${c.id} ${a.label}`).toBeGreaterThanOrEqual(1);
-        expect(n, `${c.id} ${a.label}`).toBeLessThanOrEqual(3);
+        expect(n, `${c.id} ${a.label}`).toBeLessThanOrEqual(4);
       }
   });
 
@@ -121,23 +129,24 @@ describe('cards', () => {
 });
 
 describe('endings', () => {
-  it('has 8 early and 10 final endings, each with a basis and a sourced reality line', () => {
-    expect(ENDINGS.filter((e) => e.early)).toHaveLength(8);
+  it('has 3 early and 10 final endings, each with a basis and a sourced reality line', () => {
+    expect(ENDINGS.filter((e) => e.early)).toHaveLength(3);
     expect(ENDINGS.filter((e) => !e.early)).toHaveLength(10);
     const urls = new Set(Object.values(SOURCES).map((s) => s.url));
     for (const e of ENDINGS) {
       expect(validBasis(e.basis), e.id).toBe(true);
       expect(e.reality.length, e.id).toBeGreaterThan(0);
       for (const r of e.reality) expect(urls.has(r.source.url), e.id).toBe(true);
-      if (e.early) {
-        expect(e.basis.kind, e.id).toBe('real');
-        expect(e.idea, e.id).toBeTruthy();
-      }
+      if (e.early) expect(e.idea, e.id).toBeTruthy();
     }
   });
 
-  it('one early ending per gauge extreme', () => {
-    for (const g of GAUGES) for (const high of [false, true]) expect(ENDINGS.filter((e) => e.gauge === g && e.high === high)).toHaveLength(1);
+  it('one early ending per pillar at 0, none at 100', () => {
+    for (const g of PILLARS) expect(ENDINGS.filter((e) => e.early && e.gauge === g)).toHaveLength(1);
+  });
+
+  it('early endings tell what happened to the world, not to the envoy', () => {
+    for (const e of ENDINGS) expect(`${e.title} ${e.text}`, e.id).not.toMatch(/\b(envoy|mandate|recalled|replaced you|dropped you)\b/i);
   });
 });
 

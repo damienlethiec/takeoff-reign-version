@@ -1,10 +1,10 @@
-// What survives between runs: the envoy counter, the endings reached, the goals completed.
+// What survives between games: the game counter, the endings reached, the goals completed.
 // Saved in localStorage when it works; the game plays the same without it (every access is wrapped).
 
 import type { EndingId } from '../engine/types';
 
 export interface Meta {
-  /** Runs started (the next envoy is runs + 1). */
+  /** Games started (the next game is runs + 1). */
   runs: number;
   /** Runs finished. */
   finished: number;
@@ -14,7 +14,8 @@ export interface Meta {
   tutorialDone: boolean;
 }
 
-const KEY = 'takeoff-reign-version:v1';
+// v2: the world model (October 2026). Endings and goals of the envoy model are not carried over.
+const KEY = 'takeoff-reign-version:v2';
 export const emptyMeta = (): Meta => ({ runs: 0, finished: 0, endings: [], goals: [], tutorialDone: false });
 
 export function loadMeta(): Meta {

@@ -45,7 +45,7 @@ test('the production build carries a CSP that allows Google Fonts only', async (
 test('a whole run with the mouse, to an ending, then Play again', async ({ page }) => {
   const errors = await boot(page, './?seed=3&fresh');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Takeoff');
-  await page.getByRole('button', { name: /Start your term as Envoy #1/ }).click();
+  await page.getByRole('button', { name: /Start game #1/ }).click();
   expect(await screen(page)).toBe('game');
   let n = 0;
   while ((await screen(page)) === 'game' && n < 200) {
@@ -59,20 +59,22 @@ test('a whole run with the mouse, to an ending, then Play again', async ({ page 
   await expect(page.locator('#end-h')).toBeFocused();
   await expect(page.getByRole('heading', { name: 'What decided it' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'What you could not see' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The world at the end' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'In reality' })).toBeVisible();
+  await expect(page.locator('.reveal')).toContainText('The truth was');
   // every link in the ending opens safely
   for (const a of await page.locator('main a').all()) {
     expect(await a.getAttribute('href')).toMatch(/^https:\/\//);
     expect(await a.getAttribute('rel')).toContain('noopener');
   }
-  await page.getByRole('button', { name: /Play again as Envoy #2/ }).click();
-  await expect(page.locator('.envoy')).toHaveText('Envoy #2');
+  await page.getByRole('button', { name: /Play game #2/ }).click();
+  await expect(page.locator('.game-n')).toHaveText('Game #2');
   expect(errors).toEqual([]);
 });
 
 test('click previews, a second click confirms; the preview shows marks and is announced', async ({ page }) => {
   await boot(page, './?seed=12&fresh&notutorial');
-  await page.getByRole('button', { name: /Start your term/ }).click();
+  await page.getByRole('button', { name: /Start game/ }).click();
   const first = await cardText(page);
   const right = page.locator('.answer[data-side="right"]');
   await expect(right).toHaveAccessibleName(/Will change: /);
@@ -90,7 +92,7 @@ test('click previews, a second click confirms; the preview shows marks and is an
 
 test('keyboard: arrows pick, Enter confirms, Escape cancels; shortcuts ignore other controls', async ({ page }) => {
   await boot(page, './?seed=4&fresh&notutorial');
-  await page.getByRole('button', { name: /Start your term/ }).click();
+  await page.getByRole('button', { name: /Start game/ }).click();
   await expect(page.locator('#card')).toBeFocused();
   const first = await cardText(page);
   await page.keyboard.press('ArrowLeft');
@@ -112,7 +114,7 @@ test('keyboard: arrows pick, Enter confirms, Escape cancels; shortcuts ignore ot
 
 test('dragging the card past the threshold answers it; a short drag cancels', async ({ page }) => {
   await boot(page, './?seed=9&fresh&notutorial');
-  await page.getByRole('button', { name: /Start your term/ }).click();
+  await page.getByRole('button', { name: /Start game/ }).click();
   const first = await cardText(page);
   const box = (await page.locator('#card').boundingBox())!;
   const y = box.y + box.height / 2;
@@ -136,7 +138,7 @@ test('dragging the card past the threshold answers it; a short drag cancels', as
 
 test('Learn more opens a dialog with its source, closes with Escape and returns focus', async ({ page }) => {
   await boot(page, './?seed=2&fresh&notutorial');
-  await page.getByRole('button', { name: /Start your term/ }).click();
+  await page.getByRole('button', { name: /Start game/ }).click();
   for (let i = 0; i < 12 && !(await page.locator('.learn-btn').count()); i++) await answerWithMouse(page, i % 2 ? 'left' : 'right');
   const learn = page.getByRole('button', { name: /Learn more/ });
   await learn.click();
@@ -149,12 +151,12 @@ test('Learn more opens a dialog with its source, closes with Escape and returns 
   await expect(learn).toBeFocused();
 });
 
-test('the archive lists all 18 endings, reached ones first-class', async ({ page }) => {
+test('the archive lists all 13 endings, reached ones first-class', async ({ page }) => {
   await boot(page, './?fresh');
   await page.getByRole('button', { name: /Archive/ }).click();
   await expect(page.locator('#arc-h')).toBeFocused();
-  await expect(page.locator('.tile')).toHaveCount(18);
-  await expect(page.locator('.tile.locked')).toHaveCount(18);
+  await expect(page.locator('.tile')).toHaveCount(13);
+  await expect(page.locator('.tile.locked')).toHaveCount(13);
 });
 
 test('works when localStorage is blocked', async ({ page }) => {
@@ -166,20 +168,20 @@ test('works when localStorage is blocked', async ({ page }) => {
     });
   });
   const errors = await boot(page, './?seed=6');
-  await page.getByRole('button', { name: /Start your term as Envoy #1/ }).click();
+  await page.getByRole('button', { name: /Start game #1/ }).click();
   for (let i = 0; i < 5; i++) await answerWithMouse(page, i % 2 ? 'left' : 'right');
   expect(await screen(page)).toBe('game');
   expect(errors).toEqual([]);
 });
 
-test('the envoy counter and the archive persist between visits', async ({ page }) => {
+test('the game counter and the archive persist between visits', async ({ page }) => {
   await boot(page, './?seed=7&notutorial');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await page.getByRole('button', { name: /Start your term as Envoy #1/ }).click();
+  await page.getByRole('button', { name: /Start game #1/ }).click();
   await page.getByRole('button', { name: 'Menu' }).click();
-  await page.getByRole('button', { name: 'Give up this term' }).click();
-  await expect(page.getByRole('button', { name: /Start your term as Envoy #2/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Give up this game' }).click();
+  await expect(page.getByRole('button', { name: /Start game #2/ })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('button', { name: /Start your term as Envoy #2/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Start game #2/ })).toBeVisible();
 });

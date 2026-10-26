@@ -22,13 +22,13 @@ describe('html helpers', () => {
 
 describe('words for changes', () => {
   it('previews say which gauges move and how much, in words', () => {
-    expect(marksText([{ gauge: 'labs', size: 'large' }, { gauge: 'allies', size: 'small' }])).toBe('Will change: Labs a lot, Allies a little.');
+    expect(marksText([{ gauge: 'cooperation', size: 'large' }, { gauge: 'confidence', size: 'small' }])).toBe('Will change: Cooperation a lot, Confidence a little.');
     expect(marksText([])).toBe('Changes nothing you can see.');
   });
   it('announcements give direction in words and with + / −, visible gauges only', () => {
     const a = newGame({ seed: 1 });
-    const b = { ...a, gauges: { ...a.gauges, labs: 62, oversight: 45 }, hidden: { ...a.hidden, safety: 10 } };
-    expect(changesText(a, b)).toBe('Labs up a lot, +12. Oversight down a little, −5.');
+    const b = { ...a, w: { ...a.w, cooperation: a.w.cooperation + 9, cohesion: a.w.cohesion - 4, margin: 18, truth: 10, europe: 60 } };
+    expect(changesText(a, b)).toBe('Cooperation up a lot, +9. Confidence less certain (±15 → ±18). Cohesion down a little, −4. Europe’s AI is now Open.');
     expect(changesText(a, a)).toBe('Nothing you can see moved.');
   });
 });
@@ -42,9 +42,9 @@ describe('storage', () => {
     if (real) Object.defineProperty(window, 'localStorage', real);
   });
   it('ignores corrupt data', () => {
-    window.localStorage.setItem('takeoff-reign-version:v1', '{"runs":"x","endings":[1,"exodus"]}');
+    window.localStorage.setItem('takeoff-reign-version:v2', '{"runs":"x","endings":[1,"breakdown"]}');
     const m = loadMeta();
     expect(m.runs).toBe(0);
-    expect(m.endings).toEqual(['exodus']);
+    expect(m.endings).toEqual(['breakdown']);
   });
 });

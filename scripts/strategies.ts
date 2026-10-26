@@ -1,61 +1,57 @@
 // Player strategies for the simulation (scripts/sim.ts) and the balance tests.
 // A strategy sees the state and the card, and returns a side. The skilled strategies read the true effects of
-// each answer: they stand for a player who has learned the game over many runs.
+// each answer: they stand for a player who has learned the game over many games.
 
 import { answer, answerOf, cardOf, newGame, result } from '../src/engine';
+import { settleConfidence } from '../src/engine/rules';
 import { nextRandom, seedToRng } from '../src/engine/rng';
-import type { EndingResult, GameState, GaugeId, Side } from '../src/engine/types';
-import { GAUGES } from '../src/engine/types';
+import type { EndingResult, GameState, Side, WorldState } from '../src/engine/types';
+import { EFFECT_KEYS } from '../src/engine/types';
 
 export interface Strategy {
   name: string;
   choose: (s: GameState, rnd: () => number) => Side;
 }
 
-/** Cost of a gauge position: grows steeply toward 0 and 100. */
-const gaugeCost = (v: number) => {
-  const d = Math.abs(v - 50);
-  return d * d + (v <= 0 || v >= 100 ? 1e6 : 0) + (d > 35 ? (d - 35) ** 3 : 0);
-};
-
-function after(s: GameState, side: Side): Record<GaugeId, number> {
+/** The world after an answer (before time passes). */
+export function after(s: GameState, side: Side): WorldState {
   const e = answerOf(cardOf(s), side).effects;
-  return Object.fromEntries(GAUGES.map((g) => [g, Math.max(0, Math.min(100, s.gauges[g] + (e[g] ?? 0)))])) as Record<GaugeId, number>;
+  const w = { ...s.w };
+  for (const k of EFFECT_KEYS) if (e[k]) w[k] = k === 'margin' ? w[k] + e[k]! : Math.max(0, Math.min(100, w[k] + e[k]!));
+  settleConfidence(w);
+  return w;
 }
-const cost = (g: Record<GaugeId, number>) => GAUGES.reduce((a, k) => a + gaugeCost(g[k]), 0);
+
+/** Cost of a pillar's value: grows steeply toward 0 (a collapse), gently elsewhere. */
+export const pillarCost = (v: number) => (v <= 0 ? 1e6 : (100 - v) ** 2 / 100 + (v < 25 ? (25 - v) ** 3 / 10 : 0));
+
+const pick = (l: number, r: number, rnd: () => number): Side => (l === r ? (rnd() < 0.5 ? 'left' : 'right') : l < r ? 'left' : 'right');
 
 export const alwaysLeft: Strategy = { name: 'always left', choose: () => 'left' };
 export const alwaysRight: Strategy = { name: 'always right', choose: () => 'right' };
 export const randomStrategy: Strategy = { name: 'random', choose: (_s, rnd) => (rnd() < 0.5 ? 'left' : 'right') };
 
-/** Keeps the gauges near 50; ignores what it cannot see. */
+/** Reads only what the screen shows: keeps Cooperation, Confidence (its low end) and Cohesion high, AI power slow. */
 export const balancer: Strategy = {
   name: 'balancer',
   choose: (s, rnd) => {
-    const c = cardOf(s);
-    if (!c.right) return 'left';
-    const l = cost(after(s, 'left'));
-    const r = cost(after(s, 'right'));
-    return l === r ? (rnd() < 0.5 ? 'left' : 'right') : l < r ? 'left' : 'right';
+    if (!cardOf(s).right) return 'left';
+    const cost = (w: WorldState) =>
+      pillarCost(w.cooperation) + pillarCost(w.confidence - 0.5 * w.margin) + 1e6 * +(w.confidence <= 0) + pillarCost(w.cohesion) + 2 * w.aiPower;
+    return pick(cost(after(s, 'left')), cost(after(s, 'right')), rnd);
   },
 };
 
-/** A balancer that also favours Safety and Cooperation (it has learned which answers help them). */
+/** Has learned what each answer really does: favours the true Confidence, Cooperation and Cohesion. */
 export const thoughtful: Strategy = {
   name: 'thoughtful',
   choose: (s, rnd) => {
-    const c = cardOf(s);
-    if (!c.right) return 'left';
-    const score = (side: Side) => {
-      const e = answerOf(c, side).effects;
-      return cost(after(s, side)) - THOUGHT_WEIGHT * (2 * (e.safety ?? 0) + (e.coop ?? 0));
-    };
-    const l = score('left');
-    const r = score('right');
-    return l === r ? (rnd() < 0.5 ? 'left' : 'right') : l < r ? 'left' : 'right';
+    if (!cardOf(s).right) return 'left';
+    const cost = (w: WorldState) =>
+      pillarCost(w.cooperation) + 1.5 * pillarCost(w.truth) + 1e6 * +(w.confidence <= 0) + (w.confidence < 20 ? (20 - w.confidence) ** 3 / 10 : 0) + pillarCost(w.cohesion) + 2 * w.aiPower;
+    return pick(cost(after(s, 'left')), cost(after(s, 'right')), rnd);
   },
 };
-export const THOUGHT_WEIGHT = 60;
 
 export const STRATEGIES: Strategy[] = [alwaysLeft, alwaysRight, randomStrategy, balancer, thoughtful];
 

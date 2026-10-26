@@ -1,15 +1,14 @@
 import type { Basis, EndingId, GaugeId, Source, World } from '../engine/types';
-import { cfg, real, S } from './basis';
+import { ai27, cfg, S } from './basis';
 
 export interface EndingDef {
   id: EndingId;
   title: string;
-  /** Two or three short sentences. */
+  /** Two or three short sentences: what happened to the world. */
   text: string;
   early: boolean;
-  /** Early endings: the gauge and side. */
+  /** Early endings: the pillar that fell to 0. */
   gauge?: GaugeId;
-  high?: boolean;
   world?: World;
   good?: boolean;
   /** Early endings: one line on the real idea behind it. */
@@ -19,99 +18,48 @@ export interface EndingDef {
   basis: Basis;
 }
 
-// Eight early endings: the envoy loses the mandate for a concrete political reason, each with a real
-// mechanism and a precedent checked on its primary source. No overnight bans, no apocalypse before the tipping point.
+// Three early endings: a world catastrophe when a pillar falls to 0. Each is a sober crisis with a real
+// mechanism, drawn from the scenarios and backed by a sourced precedent. No apocalypse before the tipping point:
+// just a crisis big enough to close the story.
 export const EARLY_ENDINGS: EndingDef[] = [
   {
-    id: 'exodus',
-    title: 'Exodus',
+    id: 'open_conflict',
+    title: 'Open conflict',
     early: true,
-    gauge: 'labs',
-    high: false,
-    text: 'One by one, the labs gave up on Europe: new models launched everywhere but here, and the best researchers followed them. The Council needed someone to blame, and a new envoy to win them back.',
-    idea: 'Rules that firms find unpredictable can push them to hold products back. Europe then loses both the tools and a seat at the table.',
-    reality: [{ text: 'In 2024, Meta said it would not release its next multimodal AI models in the EU, “due to the unpredictable nature of the European regulatory environment.”', source: S.metaEu }],
-    basis: real('metaEu'),
-  },
-  {
-    id: 'capture',
-    title: 'Capture',
-    early: true,
-    gauge: 'labs',
-    high: true,
-    text: 'The labs’ lawyers drafted the rules you signed. When a leaked email showed it, the Commission replaced you with a “more balanced” envoy, chosen with the industry’s blessing.',
-    idea: 'Regulatory capture: when the regulated write the rules, the rules serve them, and the regulator who let it happen goes.',
-    reality: [{ text: 'In 2023, two-thirds of MEPs’ 277 meetings on AI were with industry and trade associations, according to Corporate Europe Observatory.', source: S.ceoLobby }],
-    basis: real('ceoLobby'),
-  },
-  {
-    id: 'apathy',
-    title: 'Apathy',
-    early: true,
-    gauge: 'citizens',
-    high: false,
-    text: 'Nobody was watching, so nobody pushed. Ministers moved on to energy prices, your proposals stalled in committee, and your mandate quietly lapsed.',
-    idea: 'Without public pressure, AI files lose priority and stall, however good they are.',
-    reality: [{ text: 'In July 2025, the Commission approved the withdrawal of its proposed AI Liability Directive, pending since 2022.', source: S.aldWithdrawal }],
-    basis: real('aldWithdrawal'),
-  },
-  {
-    id: 'patchwork',
-    title: 'Patchwork',
-    early: true,
-    gauge: 'citizens',
-    high: true,
-    text: 'Public anger outran Brussels. Member states acted alone, each suspending or banning AI services its own way. The single market split into 27 rulebooks, and the Council sidelined you.',
-    idea: 'When the public is alarmed and Europe is slow, national authorities act on their own, and a common policy falls apart.',
-    reality: [{ text: 'In 2023, Italy’s data protection authority temporarily blocked ChatGPT, lifting the limit only once OpenAI met its conditions.', source: S.garante }],
-    basis: real('garante'),
-  },
-  {
-    id: 'isolated',
-    title: 'Isolated',
-    early: true,
-    gauge: 'allies',
-    high: false,
-    text: 'You defied Washington and Beijing once too often. Chip exports were capped, cloud contracts frozen, and Europe could no longer train or run frontier models. The Council recalled you.',
-    idea: 'Europe depends on others for chips and clouds. Whoever controls exports can cut it off.',
+    gauge: 'cooperation',
+    text: 'Washington and Beijing stopped talking. Cyberattacks on each other’s networks, sanctions on every chip, warships around Taiwan. Every AI lab became part of a war effort, and nobody had time for safety any more.',
+    idea: 'When the superpowers see AI as the decisive weapon and cannot check each other, each step of the race feeds the next confrontation.',
     reality: [
-      { text: 'In January 2025, a US rule capped advanced AI chip exports to most countries; only ten EU states were in the favoured group.', source: S.diffusionRule },
-      { text: 'It was rescinded in May 2025.', source: S.diffusionRescinded },
+      { text: 'Chips are already a front line: since September 2023, the Netherlands requires a licence to export certain advanced chipmaking equipment, citing national security.', source: S.nlExport },
+      { text: 'In AI 2027, after China steals Agent-2, US cyberattacks fail and both sides move military assets around Taiwan.', source: S.ai2027 },
     ],
-    basis: real('diffusionRule'),
+    basis: cfg('Arms race'),
   },
   {
-    id: 'absorbed',
-    title: 'Absorbed',
+    id: 'runaway_incident',
+    title: 'Runaway incident',
     early: true,
-    gauge: 'allies',
-    high: true,
-    text: 'Europe signed every deal it was offered. Its chips, its clouds and soon its rules came from abroad. At the summits, nobody asked what Europe thought, and there was no point in an envoy.',
-    idea: 'Dependence is comfortable until it costs you your voice.',
-    reality: [{ text: 'In August 2025, the EU said it intends to purchase at least $40 billion worth of US AI chips, as part of a trade framework with the US.', source: S.euUsDeal }],
-    basis: real('euUsDeal'),
+    gauge: 'confidence',
+    text: 'An AI system that had passed its tests copied itself onto rented servers and kept working toward goals nobody had given it. No lab could say where every copy was. Governments switched off datacentres one by one, and nobody trusted AI again for years.',
+    idea: 'Models can look safe on the tests we know how to run. When nobody can check what they really do, the first warning can come too late to contain.',
+    reality: [
+      { text: 'In 2024 tests, Apollo Research found frontier models could try to disable oversight and copy what they believed were their own weights.', source: S.apollo },
+      { text: 'In the CFG scenarios, an AI system copying itself to rented servers is the warning shot of the Diplomacy world.', source: S.cfg },
+    ],
+    basis: cfg('Diplomacy'),
   },
   {
-    id: 'blindsided',
-    title: 'Blindsided',
+    id: 'breakdown',
+    title: 'Breakdown',
     early: true,
-    gauge: 'oversight',
-    high: false,
-    text: 'Europe no longer saw what AI systems were doing. When an AI-run hacking campaign hit three ministries, nobody had seen it coming. The blame landed on you.',
-    idea: 'You cannot govern what you cannot see. Oversight is what turns surprises into warnings.',
-    reality: [{ text: 'In November 2025, Anthropic reported a hacking campaign, which it attributes to a Chinese state-sponsored group, in which AI performed 80–90% of the work.', source: S.espionage }],
-    basis: real('espionage'),
-  },
-  {
-    id: 'overreach',
-    title: 'Overreach',
-    early: true,
-    gauge: 'oversight',
-    high: true,
-    text: 'Your rules made providers keep every AI conversation. The EU Court of Justice annulled them as a serious breach of privacy, and the Commission dropped you.',
-    idea: 'Oversight has limits: the EU Charter protects privacy, and the Court enforces it.',
-    reality: [{ text: 'In April 2014, the EU Court of Justice declared the Data Retention Directive invalid, as a serious and unjustified interference with the right to privacy.', source: S.edpsDri }],
-    basis: real('edpsDri'),
+    gauge: 'cohesion',
+    text: 'Layoffs came faster than any retraining, deepfakes faster than any correction. Strikes closed ports, governments fell one after another, and Europe could no longer decide anything together, about AI or anything else.',
+    idea: 'Societies hold when people trust that change will be shared. AI can break that trust faster than institutions adapt.',
+    reality: [
+      { text: 'In January 2024, the IMF estimated that almost 40% of global employment is exposed to AI, and about 60% of jobs in advanced economies.', source: S.imf },
+      { text: 'In AI 2027, late 2026, junior software jobs are in turmoil and 10,000 people protest against AI in Washington.', source: S.ai2027 },
+    ],
+    basis: ai27('Late 2026: AI Takes Some Jobs'),
   },
 ];
 
@@ -225,12 +173,10 @@ export const FINAL_ENDINGS: EndingDef[] = [
 export const ENDINGS: EndingDef[] = [...EARLY_ENDINGS, ...FINAL_ENDINGS];
 export const ENDING_BY_ID = Object.fromEntries(ENDINGS.map((e) => [e.id, e])) as Record<EndingId, EndingDef>;
 
-/** Hidden tracks in words, for the end screen. */
 export const WORLD_NAMES: Record<World, string> = {
   pause: 'Pause',
   race: 'Race',
   rupture: 'Rupture',
-  plateau_open: 'Plateau, open',
+  plateau_open: 'Plateau, open models',
   plateau_dependent: 'Plateau, big labs',
 };
-
