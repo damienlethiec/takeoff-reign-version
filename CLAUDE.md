@@ -48,7 +48,7 @@ npm run shots     # screenshots of every screen at 390×844 and 1280×800 into d
 - **Every real-world fact shown has a primary source** in `sources.ts`, checked by reading it; if it cannot be verified, drop it. Fiction (OpenBrain, DeepCent, NimbusAI, every event after 2026) is always labelled: story news starts "In this story", scenario Learn more lines start "In AI 2027" or "In the CFG scenarios".
 - **Early endings are world catastrophes told soberly** (open conflict, a runaway AI incident, society breaking down), each with a basis and a sourced precedent. No apocalypse before the tipping point: a crisis that closes the story.
 - List every interpretation or stretch under "Realism notes" in `docs/BUILD_NOTES.md`, for Louis and the fact-check.
-- Fonts stay on Google Fonts (v3's: Big Shoulders Display, Public Sans, IBM Plex Mono, Newsreader); the production CSP allows `fonts.googleapis.com` and `fonts.gstatic.com` only. The look follows v3's visual charter (colour tokens and gauge styling in `src/ui/styles.css`).
+- Fonts are self-hosted via Fontsource npm packages (`src/ui/fonts.css`; v3's families: Big Shoulders Display, Public Sans, IBM Plex Mono, Newsreader; team decision of 26 Oct, for GDPR): the production CSP has `font-src 'self'` and the game makes no third-party request. Never load fonts or anything else from a CDN. The look follows v3's visual charter (colour tokens and gauge styling in `src/ui/styles.css`).
 
 ## Security
 

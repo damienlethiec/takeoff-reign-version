@@ -1,3 +1,4 @@
+import './ui/fonts.css';
 import './ui/styles.css';
 import { App } from './ui/app';
 

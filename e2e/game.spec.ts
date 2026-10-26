@@ -34,12 +34,12 @@ async function answerWithMouse(page: Page, side: 'left' | 'right') {
   await page.waitForTimeout(260);
 }
 
-test('the production build carries a CSP that allows Google Fonts only', async ({ page }) => {
+test('the production build carries a CSP with no third-party origin (fonts are self-hosted)', async ({ page }) => {
   await boot(page, './');
   const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
   expect(csp).toContain("script-src 'self'");
-  expect(csp).toContain('https://fonts.googleapis.com');
-  expect(csp).toContain('https://fonts.gstatic.com');
+  expect(csp).toContain("font-src 'self';");
+  expect(csp).not.toMatch(/https?:/);
 });
 
 test('a whole run with the mouse, to an ending, then Play again', async ({ page }) => {

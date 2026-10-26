@@ -50,7 +50,8 @@ Built overnight on 25–26 October 2026 from `docs/SPEC.md`, then **reworked on 
 8. **A tutorial guide.** Noor, your chief of staff (an added fictional character), runs the tutorial and the Year in review.
 9. **Names.** The cast keeps its fictional names (Grant Holloway, Wei Lan, Marcus Reed, Dr Amara Okafor, Bruno Ferreira, Sanna Lindqvist, Col. Ines Marchetti, Kenji Mori, Clara Novak). The founder's lab is **NimbusAI**, CFG's fictional EU champion.
 10. **Single-button cards** change nothing and are exempt from "every answer costs something".
-11. **Screenshots** use fallback fonts: the sandbox cannot reach Google Fonts, so the scripts stub them. Big Shoulders Display is condensed; the fallback is wider, so the phone layout hides the small logo below 440 px to stay within the viewport either way.
+11. **Screenshots** used fallback fonts until 26 Oct (the sandbox could not reach Google Fonts); the fonts are now self-hosted (decision 12), so screenshots show the real faces. Big Shoulders Display is condensed; the fallback is wider, so the phone layout hides the small logo below 440 px to stay within the viewport either way.
+12. **Fonts are self-hosted** (26 Oct, for GDPR: loading them from Google sends every player's IP address to Google, which LG München I held unlawful without consent on 20 Jan 2022, 3 O 17493/20). Fontsource npm packages (`src/ui/fonts.css`), same families and weights; Newsreader is the variable font with its `opsz` axis, pinned to 500 upright and 400 italic as Google served it. CSP `font-src 'self'`, no third-party request.
 
 ## Simulation (final)
 
