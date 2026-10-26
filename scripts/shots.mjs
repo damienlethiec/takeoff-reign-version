@@ -95,9 +95,9 @@ async function shoot(viewport, tag) {
   return errors;
 }
 
-let errs = [];
+const errs = [];
 try {
-  errs = [...(await shoot({ width: 390, height: 844 }, 'phone')), ...(await shoot({ width: 1280, height: 800 }, 'desktop'))];
+  errs.push(...(await shoot({ width: 390, height: 844 }, 'phone')), ...(await shoot({ width: 1280, height: 800 }, 'desktop')));
 } finally {
   await browser.close();
   server.stop();
