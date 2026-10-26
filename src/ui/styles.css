@@ -892,3 +892,30 @@ kbd {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------- narrow phones (320–360 px) */
+.date,
+.envoy {
+  white-space: nowrap;
+}
+@media (max-width: 360px) {
+  .timeline {
+    gap: 8px;
+  }
+  .date {
+    font-size: 1rem;
+  }
+  .envoy {
+    font-size: 0.8rem;
+  }
+  .g-tube {
+    width: 48px;
+    height: 48px;
+  }
+  .g-ico {
+    inset: 7px;
+  }
+  .card-text {
+    font-size: 1.05rem;
+  }
+}

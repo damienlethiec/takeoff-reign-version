@@ -23,6 +23,6 @@ export const CHARACTERS: Record<CharacterId, Character> = {
   journalist: { id: 'journalist', name: 'Clara Novak', role: 'Journalist', voices: 'The press and whistleblowers (AI 2027 October leak; real right-to-warn letter).' },
   lea: { id: 'lea', name: 'Léa', role: 'Your friend in Lyon', voices: 'One person living through the scenario: a translator, 34.' },
   ai: { id: 'ai', name: 'The AI', role: 'OpenBrain’s model', voices: 'The AIs of AI 2027, which speak for themselves once they improve themselves.' },
-  news: { id: 'news', name: 'Breaking news', role: 'News', voices: 'Events from the scenarios (fiction) or the real world (sourced).' },
+  news: { id: 'news', name: 'Breaking news', role: 'Headlines', voices: 'Events from the scenarios (fiction) or the real world (sourced).' },
   aide: { id: 'aide', name: 'Noor', role: 'Your chief of staff', voices: 'Your own team: the tutorial and the Year in review.' },
 };
