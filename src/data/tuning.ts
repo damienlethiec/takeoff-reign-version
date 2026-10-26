@@ -12,8 +12,13 @@ export const TUNING = {
     cohesion: 66,
     /** Europe's AI: ≥ `europe.openAt` is Open, below is Dependent. Starts Dependent. */
     europe: 42,
+    /** The true Confidence starts at `truth` ± this (hidden, drawn per game; always inside the margin). */
+    truthSpread: 0,
   },
   europe: { openAt: 50 },
+  /** Answers' effects are scaled: `gain` on the part that helps (a pillar, the truth or Europe's AI up, the margin
+   *  narrower, AI slower), `cost` on the part that hurts. Lets the simulation tune the whole deck at once. */
+  effects: { gain: 1, cost: 1 },
   confidence: { minMargin: 3, maxMargin: 30 },
   time: {
     /** Months per time-advancing card (about three weeks). */
@@ -29,6 +34,8 @@ export const TUNING = {
     perCard: 0.9,
     /** Extra speed when Cooperation is low: × (1 + raceBoost × (50 − cooperation) / 50), never below 1 − raceBoost. */
     raceBoost: 0.35,
+    /** High Cooperation slows AI power down to this share of its pace, never further. */
+    raceFloor: 0.65,
     /** The hidden takeoff speed: a multiplier drawn once per game from one of three bands. */
     takeoff: {
       slow: { p: 0.3, min: 0.55, max: 0.85 },
@@ -63,6 +70,8 @@ export const TUNING = {
     truthHigh: -0.15,
     /** The labs' reports push the estimate up each card. */
     labReports: 0.3,
+    /** AI gets harder to read as it grows: the margin widens each card past `highPower`. */
+    marginHigh: 0,
     highPower: 60,
   },
   /** Cooperation zones (v3): Pause 60+, Race 30–59, Rupture below. */

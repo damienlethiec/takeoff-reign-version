@@ -2,7 +2,7 @@
 // A strategy sees the state and the card, and returns a side. The skilled strategies read the true effects of
 // each answer: they stand for a player who has learned the game over many games.
 
-import { answer, answerOf, cardOf, newGame, result } from '../src/engine';
+import { answer, answerOf, cardOf, newGame, result, scaled } from '../src/engine';
 import { settleConfidence } from '../src/engine/rules';
 import { nextRandom, seedToRng } from '../src/engine/rng';
 import type { EndingResult, GameState, Side, WorldState } from '../src/engine/types';
@@ -15,7 +15,7 @@ export interface Strategy {
 
 /** The world after an answer (before time passes). */
 export function after(s: GameState, side: Side): WorldState {
-  const e = answerOf(cardOf(s), side).effects;
+  const e = scaled(answerOf(cardOf(s), side).effects);
   const w = { ...s.w };
   for (const k of EFFECT_KEYS) if (e[k]) w[k] = k === 'margin' ? w[k] + e[k]! : Math.max(0, Math.min(100, w[k] + e[k]!));
   settleConfidence(w);

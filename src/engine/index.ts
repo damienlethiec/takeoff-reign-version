@@ -41,13 +41,14 @@ export function newGame(opts: NewGameOptions): GameState {
   const holder = { rng: seedToRng(opts.seed) };
   const takeoff = drawTakeoff(holder);
   const S = TUNING.start;
+  const truth = Math.round(S.truth + (random(holder) * 2 - 1) * S.truthSpread);
   const s: GameState = {
     seed: opts.seed,
     rng: holder.rng,
     run: opts.run ?? 1,
     turn: 0,
     month: 0,
-    w: { aiPower: S.aiPower, cooperation: S.cooperation, confidence: S.confidence, margin: S.margin, truth: S.truth, cohesion: S.cohesion, europe: S.europe },
+    w: { aiPower: S.aiPower, cooperation: S.cooperation, confidence: S.confidence, margin: S.margin, truth, cohesion: S.cohesion, europe: S.europe },
     takeoff,
     lowCohesion: S.cohesion,
     milestones: [],
@@ -116,7 +117,7 @@ export const answerOf = (card: CardDef, side: Side): Answer => (side === 'right'
 /** The visible marks of an answer: which gauges move and roughly how much, not in which direction.
  *  Confidence shows a mark when its estimate or its margin moves; the hidden truth and Europe's AI lean never do. */
 export function marks(a: Answer): Mark[] {
-  const e = a.effects;
+  const e = scaled(a.effects);
   const size = (g: GaugeId) => (g === 'confidence' ? Math.max(Math.abs(e.confidence ?? 0), Math.abs(e.margin ?? 0)) : Math.abs(e[g] ?? 0));
   return GAUGES.filter((g) => size(g) > 0).map((g) => ({ gauge: g, size: size(g) >= TUNING.largeMark ? 'large' : 'small' }));
 }
@@ -146,6 +147,19 @@ function diff(a: WorldState, b: WorldState): Effects {
   return d;
 }
 
+/** Does this change help the world? (pillars, truth, Europe's AI up; margin narrower; AI slower) */
+const helps = (k: EffectKey, v: number) => (k === 'margin' || k === 'aiPower' ? v < 0 : v > 0);
+
+/** An answer's effects after the deck-wide gain and cost scales (TUNING.effects). */
+export function scaled(e: Effects): Effects {
+  const out: Effects = {};
+  for (const k of EFFECT_KEYS) {
+    const v = e[k];
+    if (v) out[k] = v * (helps(k, v) ? TUNING.effects.gain : TUNING.effects.cost);
+  }
+  return out;
+}
+
 /** Applies effects to a world (mutates it) and keeps Confidence consistent. */
 function apply(w: WorldState, e: Effects): void {
   for (const k of EFFECT_KEYS) {
@@ -159,7 +173,7 @@ function apply(w: WorldState, e: Effects): void {
 /** AI power gained by one card of time passing (before the answer's own effect). */
 export function powerStep(s: Pick<GameState, 'takeoff' | 'w'>): number {
   const P = TUNING.aiPower;
-  const race = Math.max(1 - P.raceBoost, 1 + (P.raceBoost * (50 - s.w.cooperation)) / 50);
+  const race = Math.max(P.raceFloor, 1 + (P.raceBoost * (50 - s.w.cooperation)) / 50);
   return P.perCard * s.takeoff * race;
 }
 
@@ -170,7 +184,10 @@ function drift(s: GameState): void {
   const high = w.aiPower >= D.highPower;
   w.cooperation = clamp(round1(w.cooperation + D.cooperation + (high ? D.cooperationHigh : 0)));
   w.cohesion = clamp(round1(w.cohesion + (high ? D.cohesionHigh : 0) + (w.cooperation < TUNING.zones.race ? D.cohesionRupture : 0)));
-  if (high) w.truth = clamp(round1(w.truth + D.truthHigh));
+  if (high) {
+    w.truth = clamp(round1(w.truth + D.truthHigh));
+    w.margin = round1(w.margin + D.marginHigh);
+  }
   w.confidence = clamp(round1(w.confidence + D.labReports));
   w.aiPower = round1(w.aiPower + powerStep(s));
   settleConfidence(w);
@@ -182,7 +199,7 @@ export function answer(state: GameState, side: Side): GameState {
   const card = cardOf(s);
   const a = answerOf(card, side);
   const before = snapshot(s.w);
-  apply(s.w, a.effects);
+  apply(s.w, scaled(a.effects));
   const delta = diff(before, s.w);
   for (const f of a.flags ?? []) if (!s.flags.includes(f)) s.flags.push(f);
   if (!s.seen.includes(card.id)) s.seen.push(card.id);
