@@ -184,7 +184,7 @@ export function answer(state: GameState, side: Side): GameState {
   const advances = !NO_TIME.has(card.kind) && s.phase === 'play';
   if (advances) {
     s.turn += 1;
-    s.month = round1(s.turn * TUNING.time.monthsPerCard);
+    s.month = s.turn * TUNING.time.monthsPerCard;
   }
   for (const f of a.followUps ?? []) s.followUps.push({ id: f.id, due: s.turn + f.after });
   s.history.push({ turn: s.turn, month: s.month, cardId: card.id, who: card.who, side: card.right ? side : 'left', label: a.label, record: a.record, delta });

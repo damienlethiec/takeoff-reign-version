@@ -309,7 +309,7 @@ const RES: CardDef[] = [
     who: 'researcher',
     text: 'Thousands have signed a call to pause the biggest AI training runs. Put your name on it. People will notice.',
     left: { label: 'Not my place', effects: { citizens: -8, oversight: -5 }, record: 'declined to sign the pause letter' },
-    right: { label: 'Sign it', effects: { citizens: 10, oversight: 5, labs: -8, allies: -3 }, record: 'signed the call to pause giant AI training runs' },
+    right: { label: 'Sign it', effects: { citizens: 10, labs: -8, allies: -3, safety: 2 }, record: 'signed the call to pause giant AI training runs' },
     learn: learn('In March 2023, an open letter asked all AI labs to pause for at least six months the training of systems more powerful than GPT-4. It shows 31,810 signatures.', S.fliPause),
     basis: real('fliPause'),
   },
