@@ -181,13 +181,14 @@ export function answer(state: GameState, side: Side): GameState {
   const delta = apply(s, a.effects);
   for (const f of a.flags ?? []) if (!s.flags.includes(f)) s.flags.push(f);
   if (!s.seen.includes(card.id)) s.seen.push(card.id);
+  const shownMonth = s.month;
   const advances = !NO_TIME.has(card.kind) && s.phase === 'play';
   if (advances) {
     s.turn += 1;
     s.month = s.turn * TUNING.time.monthsPerCard;
   }
   for (const f of a.followUps ?? []) s.followUps.push({ id: f.id, due: s.turn + f.after });
-  s.history.push({ turn: s.turn, month: s.month, cardId: card.id, who: card.who, side: card.right ? side : 'left', label: a.label, record: a.record, delta });
+  s.history.push({ turn: s.turn, month: shownMonth, cardId: card.id, who: card.who, side: card.right ? side : 'left', label: a.label, record: a.record, delta });
 
   // time passes: hidden drift and AI progress
   const prevMonth = state.month;

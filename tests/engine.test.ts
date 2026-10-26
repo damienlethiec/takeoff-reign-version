@@ -5,10 +5,9 @@ import { MILESTONE_ORDER } from '../src/data/milestones';
 import { TUNING } from '../src/data/tuning';
 import { answer, answerOf, cardOf, eligible, marks, newGame, readLearn, result, view } from '../src/engine';
 import { dateLabel, finalEnding, steadiness, worldOf } from '../src/engine/rules';
-import type { GameState, Side } from '../src/engine/types';
+import type { Side } from '../src/engine/types';
 import { balancer, playRun, randomStrategy, thoughtful } from '../scripts/strategies';
 
-const play = (s: GameState, sides: Side[]) => sides.reduce((st, side) => answer(st, side), s);
 
 describe('newGame', () => {
   it('starts at 50 on every gauge, January 2027, and is reproducible from its seed', () => {

@@ -129,6 +129,7 @@ export type Side = 'left' | 'right';
 
 export interface HistoryEntry {
   turn: number;
+  /** The date shown on the card when it was answered. */
   month: number;
   cardId: string;
   who: CharacterId;
